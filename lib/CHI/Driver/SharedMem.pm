@@ -55,7 +55,7 @@ our $VERSION = '0.14';
 
 =head1 SYNOPSIS
 
-L<CHI> driver which stores data in shared memory objects for persistently
+L<CHI> driver which stores data in shared memory objects for persistency
 over processes.
 Size is an optional parameter containing the size of the shared memory area,
 in bytes.
