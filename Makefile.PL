@@ -30,6 +30,7 @@ WriteMakefile(
 	'CHI::Test::Util' => 0,
 	'Date::Parse' => 0,	# Used by CHI::Test but not a prereq of it
 	# 'Test::Kwalitee' => 0,
+	'Test::Requires' => 0,
     },
     PREREQ_PM => {
 	'JSON' => 0,
