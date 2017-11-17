@@ -37,7 +37,7 @@ Declare the driver being tested
 =cut
 
 sub testing_driver_class {
-	'CHI::Driver::SharedMem'
+	return 'CHI::Driver::SharedMem';
 }
 
 =head2 new_cache_options
