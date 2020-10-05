@@ -94,7 +94,8 @@ The shared memory area is stored thus:
 
 =head2 store
 
-Stores an object in the cache
+Stores an object in the cache.
+The data are serialized into JSON.
 
 =cut
 
@@ -339,9 +340,9 @@ You can also look for information at:
 
 L<http://rt.cpan.org/NoAuth/Bugs.html?Dist=CHI-Driver-SharedMem>
 
-=item * AnnoCPAN: Annotated CPAN documentation
+=item * CPAN Testers Matrix
 
-L<http://annocpan.org/dist/CHI-Driver-SharedMem-Info>
+L<http://cpantesters.org/distro/C/CHI-Driver-SharedMem.html>
 
 =item * CPAN Ratings
 
@@ -355,7 +356,6 @@ L<http://search.cpan.org/dist/CHI-Driver-SharedMem>
 
 
 =head1 ACKNOWLEDGEMENTS
-
 
 =head1 LICENSE AND COPYRIGHT
 
