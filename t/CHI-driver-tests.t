@@ -26,14 +26,13 @@ if($@ || $SIGSYS_count) {
 
 if($do_tests) {
 	# Remove any shared memory around from a previous failure
-	my $shm = IPC::SharedMem->new($shmkey, $size, S_IRUSR|S_IWUSR);
-	if(defined($shm)) {
+	my $shm;
+	if(defined($shm = IPC::SharedMem->new($shmkey, $size, S_IRUSR|S_IWUSR))) {
 		$shm->remove();
 	}
 	CHI::Driver::SharedMem::t::CHIDriverTests->runtests();
 	# Remove the shared memory area we've just created.
-	$shm = IPC::SharedMem->new($shmkey, $size, S_IRUSR|S_IWUSR);
-	if(defined($shm)) {
+	if(defined($shm = IPC::SharedMem->new($shmkey, $size, S_IRUSR|S_IWUSR))) {
 		$shm->remove();
 	}
 } else {

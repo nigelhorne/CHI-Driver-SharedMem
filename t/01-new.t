@@ -11,7 +11,7 @@ use IPC::SysV qw(S_IRUSR S_IWUSR);
 use IPC::SharedMem;
 
 BEGIN {
-    use_ok( 'CHI::Driver::SharedMem' ) || print "Bail out!
+	use_ok('CHI::Driver::SharedMem') || print "Bail out!
 ";
 }
 
@@ -24,7 +24,7 @@ NEW: {
 	};
 	if($@ || $SIGSYS_count) {
 		if($^O eq 'cygwin') {
-			diag("It may be that the cygserver service isn't running.");
+			BAIL_OUT("It may be that the cygserver service isn't running.");
 		}
 	} else {
 		ok(!defined($shm), 'Shared memory area does not exist before the test');

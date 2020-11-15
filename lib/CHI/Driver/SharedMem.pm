@@ -298,7 +298,7 @@ sub DEMOLISH {
 			$cur_size = 0;
 		}
 		$self->shm()->detach();
-		# We could scan the cache and see if all has expired.
+		# TODO: We could scan the cache and see if all has expired.
 		# If it has, then the cache could be removed if nattch = 0.
 		unless($cur_size) {
 			my $stat = $self->shm()->stat();
@@ -318,51 +318,54 @@ Nigel Horne, C<< <njh at bandsman.co.uk> >>
 Please report any bugs or feature requests to C<bug-chi-driver-sharedmem at rt.cpan.org>, or through
 the web interface at L<http://rt.cpan.org/NoAuth/ReportBug.html?Queue=CHI-Driver-SharedMem>.  I will be notified, and then you'll
 automatically be notified of progress on your bug as I make changes.
-
-
 =head1 SEE ALSO
 
-CHI, IPC::SharedMem
+L<CHI>, L<IPC::SharedMem>
 
+=cut
 
 =head1 SUPPORT
 
 You can find documentation for this module with the perldoc command.
 
-    perldoc CHI::Driver::SharedMem
-
+    perldoc CHI::Driver::SharedMemory
 
 You can also look for information at:
 
 =over 4
 
+=item * MetaCPAN
+
+L<https://metacpan.org/release/CHI-Driver-SharedMemory>
+
 =item * RT: CPAN's request tracker
 
-L<http://rt.cpan.org/NoAuth/Bugs.html?Dist=CHI-Driver-SharedMem>
+L<https://rt.cpan.org/NoAuth/Bugs.html?Dist=CHI-Driver-SharedMemory>
 
-=item * CPAN Testers Matrix
+=item * CPANTS
 
-L<http://cpantesters.org/distro/C/CHI-Driver-SharedMem.html>
+L<http://cpants.cpanauthors.org/dist/CHI-Driver-SharedMemory>
+
+=item * CPAN Testers' Matrix
+
+L<http://matrix.cpantesters.org/?dist=CHI-Driver-SharedMemory>
 
 =item * CPAN Ratings
 
-L<http://cpanratings.perl.org/d/CHI-Driver-SharedMem>
+L<http://cpanratings.perl.org/d/CHI-Driver-SharedMemory>
 
-=item * Search CPAN
+=item * CPAN Testers Dependencies
 
-L<http://search.cpan.org/dist/CHI-Driver-SharedMem>
+L<http://deps.cpantesters.org/?module=CHI::Driver::SharedMemory>
 
 =back
 
-
-=head1 ACKNOWLEDGEMENTS
-
 =head1 LICENSE AND COPYRIGHT
 
-Copyright 2012-2014 Nigel Horne.
+Copyright 2010-2019 Nigel Horne.
 
-This program is released under the following licence: GPL
+This program is released under the following licence: GPL2
 
 =cut
 
-1; # End of CHI::Driver::SharedMem
+1;
