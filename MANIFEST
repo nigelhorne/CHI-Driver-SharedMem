@@ -6,7 +6,6 @@ LICENSE
 Makefile.PL
 MANIFEST
 MANIFEST.SKIP
-META.json
 README
 README.md
 t/00-load.t
