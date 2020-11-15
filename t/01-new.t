@@ -21,6 +21,7 @@ NEW: {
 		local $SIG{SYS} = sub { $SIGSYS_count++ };
 		if($shm = IPC::SharedMem->new(1, 8 * 1024, S_IRUSR|S_IWUSR)) {
 			$shm->remove();
+			$shm = IPC::SharedMem->new(1, 8 * 1024, S_IRUSR|S_IWUSR);
 		}
 	};
 	if($@ || $SIGSYS_count) {
