@@ -297,15 +297,37 @@ sub DEMOLISH {
 			$self->_unlock();
 			$cur_size = 0;
 		}
-		$self->shm()->detach();
-		# TODO: We could scan the cache and see if all has expired.
-		# If it has, then the cache could be removed if nattch = 0.
-		unless($cur_size) {
-			my $stat = $self->shm()->stat();
-			if(defined($stat) && ($stat->nattch() == 0)) {
+		$self->_lock(type => 'write');
+		my $stat = $self->shm()->stat();
+		if($cur_size == 0) {
+			if(defined($stat) && ($stat->nattch() == 1)) {
+				$self->shm()->detach();
 				$self->shm()->remove();
 			}
+		} elsif(defined($stat) && ($stat->nattch() == 1)) {
+			# Ccan the cache and see if all has expired.
+			# If it has, then the cache could be removed if nattch = 1 (us)
+			my $can_remove = 1;
+			my @namespaces = $self->get_namespaces();
+			foreach my $namespace(@namespaces) {
+				my @keys = $self->get_keys($namespace);
+				foreach my $key(@keys) {
+					if(!$self->exists_and_is_expired($key)) {
+						$can_remove = 0;
+						last;
+					}
+				}
+			}
+			if($can_remove) {
+				$self->shm()->detach();
+				$self->shm()->remove();
+			} else {
+				$self->shm()->detach();
+			}
+		} else {
+			$self->shm()->detach();
 		}
+		$self->_unlock();
 	}
 }
 
@@ -362,7 +384,7 @@ L<http://deps.cpantesters.org/?module=CHI::Driver::SharedMemory>
 
 =head1 LICENSE AND COPYRIGHT
 
-Copyright 2010-2019 Nigel Horne.
+Copyright 2010-2020 Nigel Horne.
 
 This program is released under the following licence: GPL2
 
