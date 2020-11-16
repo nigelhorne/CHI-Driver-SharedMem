@@ -283,6 +283,9 @@ it's safe to remove it and reclaim the memory.
 =cut
 
 sub DEMOLISH {
+	if(defined($^V) && ($^V ge 'v5.14.0')) {
+		return if ${^GLOBAL_PHASE} eq 'DESTRUCT';	# >= 5.14.0 only
+	}
 	my $self = shift;
 
 	if($self->shmkey()) {
@@ -301,8 +304,8 @@ sub DEMOLISH {
 				$self->shm()->remove();
 			}
 		# } elsif(defined($stat) && ($stat->nattch() == 1)) {
-			# Can the cache and see if all has expired.
-			# If it has, then the cache could be removed if nattch = 1 (us)
+			# # Can the cache and see if all has expired.
+			# # If it has, then the cache could be removed if nattch = 1 (us)
 			# my $can_remove = 1;
 			# my @namespaces = $self->get_namespaces();
 			# foreach my $namespace(@namespaces) {
