@@ -287,43 +287,38 @@ sub DEMOLISH {
 
 	if($self->shmkey()) {
 		my $cur_size;
+		$self->_lock(type => 'write');
 		if(scalar($self->get_namespaces())) {
-			$self->_lock(type => 'read');
 			$cur_size = $self->_data_size();
-			$self->_unlock();
 		} else {
-			$self->_lock(type => 'write');
 			$self->_data_size(0);
-			$self->_unlock();
 			$cur_size = 0;
 		}
-		$self->_lock(type => 'write');
 		my $stat = $self->shm()->stat();
 		if($cur_size == 0) {
 			if(defined($stat) && ($stat->nattch() == 1)) {
 				$self->shm()->detach();
 				$self->shm()->remove();
 			}
-		} elsif(defined($stat) && ($stat->nattch() == 1)) {
-			# Ccan the cache and see if all has expired.
+		# } elsif(defined($stat) && ($stat->nattch() == 1)) {
+			# Can the cache and see if all has expired.
 			# If it has, then the cache could be removed if nattch = 1 (us)
-			my $can_remove = 1;
-			my @namespaces = $self->get_namespaces();
-			foreach my $namespace(@namespaces) {
-				my @keys = $self->get_keys($namespace);
-				foreach my $key(@keys) {
-					if(!$self->exists_and_is_expired($key)) {
-						$can_remove = 0;
-						last;
-					}
-				}
-			}
-			if($can_remove) {
-				$self->shm()->detach();
-				$self->shm()->remove();
-			} else {
-				$self->shm()->detach();
-			}
+			# my $can_remove = 1;
+			# my @namespaces = $self->get_namespaces();
+			# foreach my $namespace(@namespaces) {
+				# my @keys = $self->get_keys($namespace);
+				# foreach my $key(@keys) {
+					# if($self->is_valid($key)) {	# <------- gives substr error in CHI
+						# $can_remove = 0;
+					# }
+				# }
+			# }
+			# if($can_remove) {
+				# $self->shm()->detach();
+				# $self->shm()->remove();
+			# } else {
+				# $self->shm()->detach();
+			# }
 		} else {
 			$self->shm()->detach();
 		}
@@ -340,6 +335,7 @@ Nigel Horne, C<< <njh at bandsman.co.uk> >>
 Please report any bugs or feature requests to C<bug-chi-driver-sharedmem at rt.cpan.org>, or through
 the web interface at L<http://rt.cpan.org/NoAuth/ReportBug.html?Queue=CHI-Driver-SharedMem>.  I will be notified, and then you'll
 automatically be notified of progress on your bug as I make changes.
+
 =head1 SEE ALSO
 
 L<CHI>, L<IPC::SharedMem>
