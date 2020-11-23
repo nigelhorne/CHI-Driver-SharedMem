@@ -45,12 +45,18 @@ WriteMakefile(
     clean               => { FILES => 'CHI-Driver-SharedMem-*' },
     META_MERGE		=> {
     	'meta-spec' => { version => 2 },
-    	resources => {
-    		repository => {
+	resources => {
+		repository => {
 			type => 'git',
 			url => 'git://github.com/nigelhorne/CHI-Driver-SharedMem.git',
 			web => 'https://github.com/nigelhorne/CHI-Driver-SharedMem',
-    		},
+		}, bugtracker => {
+			# web => 'https://rt.cpan.org/Public/Dist/Display.html?Name=CHI-Driver-SharedMem',
+			# mailto => 'bug-CHI-Driver-SharedMem@rt.cpan.org'
+			web => 'https://github.com/nigelhorne/CHI-Driver-SharedMem/issues',
+			url => 'https://github.com/nigelhorne/CHI-Driver-SharedMem/issues',
+		}
+
 	},
     },
     MIN_PERL_VERSION	=> '5.6.2'	# Probably would work, but never tested on earlier versions than this
