@@ -11,15 +11,14 @@ arch:
   - s390x
   # - arm64	# Gets 404 error
 
-env:
-  - AUTOMATED_TESTING=1
-  - PERL_CPANM_OPT="--notest --force --skip-satisfied"
+env: AUTOMATED_TESTING=1 PERL_CPANM_OPT="--notest --force --skip-satisfied"
 
 perl:
   - "5.30"
-  # - "5.28" # Travis gets 404 errors trying to find some older perls
+  - "5.28"
   - "5.26"
   - "5.24"
+  # Travis gets 404 errors trying to find some older perls
   # - "5.22"
   # - "5.20"
   # - "5.18"
@@ -42,21 +41,3 @@ install:
 
 script:
   perl Makefile.PL && make && cover -test -report coveralls
-
-jobs:
-  include:
-    - stage: Windows
-      os: windows
-      language: shell
-      before_install:
-        - cinst -y strawberryperl
-        - export "PATH=/c/Strawberry/perl/site/bin:/c/Strawberry/perl/bin:/c/Strawberry/c/bin:$PATH"
-      install:
-        - cpanm --notest --installdeps .
-      script:
-        - perl Makefile.PL
-        - gmake
-        - gmake test
-
-after_failure:
-  - cat /home/travis/.cpanm/work/*/build.log
