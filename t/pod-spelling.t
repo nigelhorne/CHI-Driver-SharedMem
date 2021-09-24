@@ -20,7 +20,9 @@ if($@) {
 __END__
 AnnoCPAN
 CPAN
+CPANTS
 GPL
+MetaCPAN
 RT
 TODO
 IPC
