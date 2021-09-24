@@ -15,8 +15,6 @@ jobs:
           - macos-latest
           - ubuntu-18.04
           - ubuntu-20.04
-          - windows-2019
-          - windows-2016
         perl: ['5.34', '5.32', '5.30', '5.28', '5.22']
     name: Perl ${{ matrix.perl }} on ${{ matrix.os }}
     steps:
@@ -28,8 +26,10 @@ jobs:
       - run: perl -V
       - name: Install Dependencies
         run: |
-          cpanm -iqn --skip-satisfied File::Spec ExtUtils::MakeMaker ExtUtils::PL2Bat
+          cpanm -iqn --skip-satisfied File::Spec ExtUtils::MakeMaker
           cpanm -iqn --skip-satisfied Test::Pod::Spelling::CommonMistakes Test::Portability::Files Test::Pod::Coverage
           cpanm -iqn --installdeps --notest .
       - name: Run Tests
         run: prove -l -b t
+        env:
+          AUTHOR_TESTING: 1
