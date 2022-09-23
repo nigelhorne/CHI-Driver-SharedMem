@@ -248,7 +248,7 @@ sub _data {
 	my($self, $h) = @_;
 
 	if(defined($h)) {
-		my $f = JSON->new->ascii->encode($h);
+		my $f = JSON::MaybeXS->new()->ascii()->encode($h);
 		my $cur_size = length($f);
 		$self->shm()->write($f, $Config{intsize}, $cur_size);
 		$self->_data_size($cur_size);
@@ -258,7 +258,7 @@ sub _data {
 	unless($cur_size) {
 		return {};
 	}
-	return JSON->new->ascii->decode($self->shm()->read($Config{intsize}, $cur_size));
+	return JSON::MaybeXS->new()->ascii()->decode($self->shm()->read($Config{intsize}, $cur_size));
 }
 
 =head2 BUILD
