@@ -33,7 +33,7 @@ WriteMakefile(
 	'Test::Requires' => 0,
     },
     PREREQ_PM => {
-	'JSON' => 0,
+	'JSON::MaybeXS' => 0,
 	'Moose' => 0,
 	'IPC::SysV' => 0,
 	'IPC::SharedMem' => 0,

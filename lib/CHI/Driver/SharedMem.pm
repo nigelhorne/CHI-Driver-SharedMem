@@ -9,7 +9,7 @@ use strict;
 use Moose;
 use IPC::SysV qw(S_IRUSR S_IWUSR IPC_CREAT);
 use IPC::SharedMem;
-use JSON;
+use JSON::MaybeXS;
 use Carp;
 use Config;
 use Fcntl;
