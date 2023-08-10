@@ -194,12 +194,16 @@ sub get_namespaces {
 sub _build_shm {
 	my $self = shift;
 
+	if($self->size() == 0) {
+		croak 'Size == 0';
+		return;
+	}
 	my $shm = IPC::SharedMem->new($self->shmkey(), $self->size(), S_IRUSR|S_IWUSR);
 	unless($shm) {
 		$shm = IPC::SharedMem->new($self->shmkey(), $self->size(), S_IRUSR|S_IWUSR|IPC_CREAT);
 		unless($shm) {
-			croak 'Couldn\'t create a shared memory area with key ' .
-				$self->shmkey() . ": $!";
+			croak "Couldn't create a shared memory area with key ",
+				$self->shmkey(), ": $!";
 			return;
 		}
 		$shm->write(pack('I', 0), 0, $Config{intsize});
