@@ -2,11 +2,17 @@
 
 use Config;
 use IPC::SharedMem;
+use Data::Dumper;
+use JSON::MaybeXS;
 
 if(my $shm = IPC::SharedMem->new(98766789, 8192, S_IRUSR|S_IWUSR)) {
 	$shm->attach();
 
-	my $data = $shm->read($Config{intsize}, 8192);
+	my $size = unpack('I', $shm->read(0, $Config{intsize}));
+	print "$size bytes of data\n";
+	my $data = $shm->read($Config{intsize}, $size);
 
-	print $data;
+	print "$data\n";
+
+	# print Data::Dumper->new([JSON::MaybeXS->new()->ascii->decode($data)])->Dump();
 }

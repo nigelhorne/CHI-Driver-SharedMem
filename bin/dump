@@ -1,7 +1,7 @@
 #!/usr/bin/env perl
 
 use CHI;
-use Data::Dumper;
+# use Data::Dumper;
 
 my $cache = CHI->new(driver => 'SharedMem', shmkey => 98766789);
 
@@ -14,6 +14,5 @@ foreach my $n ($cache->get_namespaces()) {
 		print "\t$key: ", $cache->is_valid($key), "\n";
 		my $value = $cache->get($key);
 		print $value;
-		# return JSON::MaybeXS->new()->ascii()->decode($self->shm()->read($Config{intsize}, $cur_size));
 	}
 }
