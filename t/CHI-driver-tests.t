@@ -5,6 +5,7 @@ use warnings;
 use IPC::SysV qw(S_IRUSR S_IWUSR);
 use IPC::SharedMem;
 use CHI::Driver::SharedMem::t::CHIDriverTests;
+use Test::NoWarnings;
 
 # These variables are also used in lib/CHI/Driver/SharedMem/t/CHIDrivertests.pm
 our $shmkey = 12344321;
