@@ -1,3 +1,5 @@
+bin/dump
+bin/read
 Changes
 ignore.txt
 lib/CHI/Driver/SharedMem.pm

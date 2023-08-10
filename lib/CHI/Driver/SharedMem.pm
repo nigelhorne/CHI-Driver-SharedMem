@@ -307,13 +307,12 @@ sub DEMOLISH {
 			# Scan the cache and see if all has expired.
 			# If it has, then the cache can be removed if nattch = 1
 			my $can_remove = 1;
-			my @namespaces = $self->get_namespaces();
-			foreach my $namespace(@namespaces) {
-				my @keys = $self->get_keys($namespace);
-				foreach my $key(@keys) {
+			foreach my $namespace($self->get_namespaces()) {
+				foreach my $key($self->get_keys($namespace)) {
 					# May give substr error in CHI
 					if($self->is_valid($key)) {
 						$can_remove = 0;
+						last;
 					}
 				}
 			}

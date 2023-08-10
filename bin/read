@@ -1,0 +1,12 @@
+#!/usr/bin/env perl
+
+use Config;
+use IPC::SharedMem;
+
+if(my $shm = IPC::SharedMem->new(98766789, 8192, S_IRUSR|S_IWUSR)) {
+	$shm->attach();
+
+	my $data = $shm->read($Config{intsize}, 8192);
+
+	print $data;
+}
