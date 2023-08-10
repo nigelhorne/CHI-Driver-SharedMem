@@ -20,6 +20,7 @@ if(defined($shm = IPC::SharedMem->new($shmkey, $size, S_IRUSR|S_IWUSR))) {
 {
 	my $s = CHI->new(driver => 'SharedMem', size => $size, shmkey => $shmkey);
 
+	$s->on_set_error('warn');
 	# FIXME: Why does this succeed if the size is too small?
 	$s->set('xyzzy', 'x' x 80, '5 mins');
 
