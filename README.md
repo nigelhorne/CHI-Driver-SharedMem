@@ -4,11 +4,11 @@ CHI::Driver::SharedMem - Cache data in shared memory
 
 # VERSION
 
-Version 0.14
+Version 0.15
 
 # SYNOPSIS
 
-[CHI](https://metacpan.org/pod/CHI) driver which stores data in shared memory objects for persistency
+[CHI](https://metacpan.org/pod/CHI) driver which stores data in shared memory objects for persistence
 over processes.
 Size is an optional parameter containing the size of the shared memory area,
 in bytes.
@@ -103,23 +103,15 @@ You can also look for information at:
 
 - MetaCPAN
 
-    [https://metacpan.org/release/CHI-Driver-SharedMemory](https://metacpan.org/release/CHI-Driver-SharedMemory)
+    [https://metacpan.org/dist/CHI-Driver-SharedMem](https://metacpan.org/dist/CHI-Driver-SharedMem)
 
 - RT: CPAN's request tracker
 
     [https://rt.cpan.org/NoAuth/Bugs.html?Dist=CHI-Driver-SharedMemory](https://rt.cpan.org/NoAuth/Bugs.html?Dist=CHI-Driver-SharedMemory)
 
-- CPANTS
-
-    [http://cpants.cpanauthors.org/dist/CHI-Driver-SharedMemory](http://cpants.cpanauthors.org/dist/CHI-Driver-SharedMemory)
-
 - CPAN Testers' Matrix
 
     [http://matrix.cpantesters.org/?dist=CHI-Driver-SharedMemory](http://matrix.cpantesters.org/?dist=CHI-Driver-SharedMemory)
-
-- CPAN Ratings
-
-    [http://cpanratings.perl.org/d/CHI-Driver-SharedMemory](http://cpanratings.perl.org/d/CHI-Driver-SharedMemory)
 
 - CPAN Testers Dependencies
 
@@ -127,6 +119,6 @@ You can also look for information at:
 
 # LICENSE AND COPYRIGHT
 
-Copyright 2010-2020 Nigel Horne.
+Copyright 2010-2023 Nigel Horne.
 
 This program is released under the following licence: GPL2

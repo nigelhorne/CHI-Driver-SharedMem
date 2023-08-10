@@ -44,11 +44,11 @@ CHI::Driver::SharedMem - Cache data in shared memory
 
 =head1 VERSION
 
-Version 0.14
+Version 0.15
 
 =cut
 
-our $VERSION = '0.14';
+our $VERSION = '0.15';
 
 # FIXME - get the pod documentation right so that the layout of the memory
 # area looks correct in the man page
@@ -357,23 +357,15 @@ You can also look for information at:
 
 =item * MetaCPAN
 
-L<https://metacpan.org/release/CHI-Driver-SharedMemory>
+L<https://metacpan.org/dist/CHI-Driver-SharedMem>
 
 =item * RT: CPAN's request tracker
 
 L<https://rt.cpan.org/NoAuth/Bugs.html?Dist=CHI-Driver-SharedMemory>
 
-=item * CPANTS
-
-L<http://cpants.cpanauthors.org/dist/CHI-Driver-SharedMemory>
-
 =item * CPAN Testers' Matrix
 
 L<http://matrix.cpantesters.org/?dist=CHI-Driver-SharedMemory>
-
-=item * CPAN Ratings
-
-L<http://cpanratings.perl.org/d/CHI-Driver-SharedMemory>
 
 =item * CPAN Testers Dependencies
 
@@ -383,7 +375,7 @@ L<http://deps.cpantesters.org/?module=CHI::Driver::SharedMemory>
 
 =head1 LICENSE AND COPYRIGHT
 
-Copyright 2010-2020 Nigel Horne.
+Copyright 2010-2023 Nigel Horne.
 
 This program is released under the following licence: GPL2
 
