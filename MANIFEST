@@ -28,11 +28,12 @@ t/metrics.t
 t/no404s.t
 t/noplan.t
 t/pod-cm.t
+t/pod-snippets.t
 t/pod-spelling.t
+t/pod-synopsis.t
 t/pod.t
 t/port.t
 t/prereq.t
-t/snippets.t
 t/strict.t
 t/unused.t
 t/vars.t
