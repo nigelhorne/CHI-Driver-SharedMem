@@ -303,25 +303,24 @@ sub DEMOLISH {
 				$self->shm()->detach();
 				$self->shm()->remove();
 			}
-		# } elsif(defined($stat) && ($stat->nattch() == 1)) {
-			# # Scan the cache and see if all has expired.
-			# # If it has, then the cache could be removed if nattch = 1 (us)
-			# my $can_remove = 1;
-			# my @namespaces = $self->get_namespaces();
-			# foreach my $namespace(@namespaces) {
-				# my @keys = $self->get_keys($namespace);
-				# foreach my $key(@keys) {
-					# if($self->is_valid($key)) {	# <------- gives substr error in CHI
-						# $can_remove = 0;
-					# }
-				# }
-			# }
-			# if($can_remove) {
-				# $self->shm()->detach();
-				# $self->shm()->remove();
-			# } else {
-				# $self->shm()->detach();
-			# }
+		} elsif(defined($stat) && ($stat->nattch() == 1)) {
+			# Scan the cache and see if all has expired.
+			# If it has, then the cache can be removed if nattch = 1
+			my $can_remove = 1;
+			my @namespaces = $self->get_namespaces();
+			foreach my $namespace(@namespaces) {
+				my @keys = $self->get_keys($namespace);
+				foreach my $key(@keys) {
+					# May give substr error in CHI
+					if($self->is_valid($key)) {
+						$can_remove = 0;
+					}
+				}
+			}
+			$self->shm()->detach();
+			if($can_remove) {
+				$self->shm()->remove();
+			}
 		} else {
 			$self->shm()->detach();
 		}

@@ -1,5 +1,8 @@
 Revision history for CHI::Driver::SharedMem
 
+0.16
+	Reinstate more agressive code to delete unused shared memory areas
+
 0.15	Wed Aug  9 20:32:43 EDT 2023
 	Use JSON instead of Storable, it's more reliable
 	Remove the shared memory area when running 'make test'
