@@ -12,5 +12,8 @@ foreach my $n ($cache->get_namespaces()) {
 
 	foreach my $key($cache->get_keys($n)) {
 		print "\t$key: ", $cache->is_valid($key), "\n";
+		my $value = $cache->get($key);
+		print $value;
+		# return JSON::MaybeXS->new()->ascii()->decode($self->shm()->read($Config{intsize}, $cur_size));
 	}
 }
