@@ -304,7 +304,7 @@ sub DEMOLISH {
 				$self->shm()->remove();
 			}
 		# } elsif(defined($stat) && ($stat->nattch() == 1)) {
-			# # Can the cache and see if all has expired.
+			# # Scan the cache and see if all has expired.
 			# # If it has, then the cache could be removed if nattch = 1 (us)
 			# my $can_remove = 1;
 			# my @namespaces = $self->get_namespaces();
