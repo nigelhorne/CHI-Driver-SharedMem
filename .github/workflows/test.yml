@@ -1,4 +1,6 @@
 ---
+# See https://github.com/actions/virtual-environments
+#
 name: Test Code
 
 on:
@@ -8,6 +10,8 @@ on:
     tags-ignore:
       - '*'
   pull_request:
+  schedule:
+    - cron: '12 24 2 * *'
 jobs:
   build:
     runs-on: ${{ matrix.os }}
@@ -32,6 +36,11 @@ jobs:
           cpanm -iqn --skip-satisfied File::Spec ExtUtils::MakeMaker
           cpanm -iqn --skip-satisfied Test::Pod::Spelling::CommonMistakes Test::Portability::Files Test::Pod::Coverage
           cpanm -iqn --installdeps --notest .
+      - name: Make Module
+        run: |
+          # find . -name build.log | xargs cat
+          perl Makefile.PL
+          make
       - name: Run Tests
         run: prove -l -b t
         env:
