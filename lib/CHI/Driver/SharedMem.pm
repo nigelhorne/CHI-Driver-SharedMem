@@ -31,7 +31,8 @@ has '_data_size' => (
 );
 has '_data' => (
 	is => 'rw',
-	isa => 'ArrayRef[ArrayRef]',
+	# isa => 'ArrayRef[ArrayRef]',	# For Storable, now using JSON
+	isa => 'Str',
 	reader => '_get_data',
 	writer => '_set_data'
 );
@@ -213,7 +214,7 @@ sub _build_shm {
 }
 
 sub _build_lock {
-	open(my $fd, '<', $0);
+	open(my $fd, '<', $0) || croak("$0: $!");
 	return $fd;
 }
 
