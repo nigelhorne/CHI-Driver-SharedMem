@@ -23,7 +23,7 @@ has 'lock' => (
 	is => 'ro',
 	builder => '_build_lock',
 );
-has 'lock_file' => (is => 'rw', isa => 'Str');
+has 'lock_file' => (is => 'rw', isa => 'Str|Undef');
 has '_data_size' => (
 	is => 'rw',
 	isa => 'Int',
@@ -227,7 +227,13 @@ sub _build_lock {
 sub _lock {
 	my ($self, %params) = @_;
 
-	flock($self->lock(), ($params{type} eq 'read') ? Fcntl::LOCK_SH : Fcntl::LOCK_EX);
+	return unless $self->lock_file();
+
+	if(my $lock = $self->lock()) {
+		flock($lock, ($params{type} eq 'read') ? Fcntl::LOCK_SH : Fcntl::LOCK_EX);
+	} else {
+		croak('Lost lock: ', $self->lock_file());
+	}
 }
 
 sub _unlock {
@@ -337,6 +343,7 @@ sub DEMOLISH {
 		$self->_unlock();
 	}
 	if(my $lock_file = $self->lock_file()) {
+		$self->lock_file(undef);
 		close $self->lock();
 		unlink $lock_file;
 	}
