@@ -1,8 +1,6 @@
 Revision history for CHI::Driver::SharedMem
 
 0.16
-	Reinstate more agressive code to delete unused shared memory areas
-	Croak if size == 0
 	Use a common lock - previously locks were app named
 	Fix occasional errors in DEMOLISH trying to lock the file after it's
 		gone away

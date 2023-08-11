@@ -140,6 +140,9 @@ sub remove {
 	delete $h->{$self->namespace()}->{$key};
 	$self->_data($h);
 	$self->_unlock();
+
+	# open(my $tulip, '>>', '/tmp/tulip');
+	# print $tulip "remove: $key\n";
 }
 
 =head2 clear
@@ -156,6 +159,9 @@ sub clear {
 	delete $h->{$self->namespace()};
 	$self->_data($h);
 	$self->_unlock();
+
+	# open(my $tulip, '>>', '/tmp/tulip');
+	# print $tulip "clear ", $self->namespace(), "\n";
 }
 
 =head2 get_keys
@@ -196,10 +202,10 @@ sub get_namespaces {
 sub _build_shm {
 	my $self = shift;
 
-	if($self->size() == 0) {
-		croak 'Size == 0';
-		return;
-	}
+	# if((!defined($self->size())) || ($self->size() == 0)) {
+		# croak 'Size == 0';
+		# return;
+	# }
 	my $shm = IPC::SharedMem->new($self->shmkey(), $self->size(), S_IRUSR|S_IWUSR);
 	unless($shm) {
 		$shm = IPC::SharedMem->new($self->shmkey(), $self->size(), S_IRUSR|S_IWUSR|IPC_CREAT);
@@ -232,6 +238,8 @@ sub _lock {
 	if(my $lock = $self->lock()) {
 		flock($lock, ($params{type} eq 'read') ? Fcntl::LOCK_SH : Fcntl::LOCK_EX);
 	} else {
+		# open(my $tulip, '>>', '/tmp/tulip');
+		# print $tulip "lost lock ", $self->lock_file(), "\n";
 		croak('Lost lock: ', $self->lock_file());
 	}
 }
@@ -269,9 +277,13 @@ sub _data {
 		my $cur_size = length($f);
 		$self->shm()->write($f, $Config{intsize}, $cur_size);
 		$self->_data_size($cur_size);
+		# open(my $tulip, '>>', '/tmp/tulip');
+		# print $tulip "set: $cur_size bytes\n";
 		return $h;
 	}
 	my $cur_size = $self->_data_size();
+	# open(my $tulip, '>>', '/tmp/tulip');
+	# print $tulip "get: $cur_size bytes\n";
 	unless($cur_size) {
 		return {};
 	}
@@ -305,47 +317,50 @@ sub DEMOLISH {
 	}
 	my $self = shift;
 
+	# open(my $tulip, '>>', '/tmp/tulip');
 	if($self->shmkey()) {
 		my $cur_size;
 		$self->_lock(type => 'write');
-		if(scalar($self->get_namespaces())) {
-			$cur_size = $self->_data_size();
-		} else {
-			$self->_data_size(0);
-			$cur_size = 0;
-		}
+		$cur_size = $self->_data_size();
+		# print $tulip "DEMOLISH: $cur_size bytes\n";
+		my $can_remove = 0;
 		my $stat = $self->shm()->stat();
 		if($cur_size == 0) {
 			if(defined($stat) && ($stat->nattch() == 1)) {
 				$self->shm()->detach();
 				$self->shm()->remove();
+				$can_remove = 1;
 			}
-		} elsif(defined($stat) && ($stat->nattch() == 1)) {
-			# Scan the cache and see if all has expired.
-			# If it has, then the cache can be removed if nattch = 1
-			my $can_remove = 1;
-			foreach my $namespace($self->get_namespaces()) {
-				foreach my $key($self->get_keys($namespace)) {
-					# May give substr error in CHI
-					if($self->is_valid($key)) {
-						$can_remove = 0;
-						last;
-					}
-				}
-			}
-			$self->shm()->detach();
-			if($can_remove) {
-				$self->shm()->remove();
-			}
+		# } elsif(defined($stat) && ($stat->nattch() == 1)) {
+			# # Scan the cache and see if all has expired.
+			# # If it has, then the cache can be removed if nattch = 1
+			# $can_remove = 1;
+			# foreach my $namespace($self->get_namespaces()) {
+				# print $tulip "DEMOLISH: namespace = $namespace\n";
+				# foreach my $key($self->get_keys($namespace)) {
+					# # May give substr error in CHI
+					# print $tulip "DEMOLISH: key = $key\n";
+					# if($self->is_valid($key)) {
+					# print $tulip "DEMOLISH: is_valid\n";
+						# $can_remove = 0;
+						# last;
+					# }
+				# }
+			# }
+			# $self->shm()->detach();
+			# if($can_remove) {
+				# $self->shm()->remove();
+			# }
 		} else {
 			$self->shm()->detach();
 		}
 		$self->_unlock();
-	}
-	if(my $lock_file = $self->lock_file()) {
-		$self->lock_file(undef);
-		close $self->lock();
-		unlink $lock_file;
+		if($can_remove && (my $lock_file = $self->lock_file())) {
+			$self->lock_file(undef);
+			close $self->lock();
+			unlink $lock_file;
+			# print $tulip "unlink $lock_file\n";
+		}
 	}
 }
 
