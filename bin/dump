@@ -15,7 +15,7 @@ foreach my $n ($cache->get_namespaces()) {
 		# my $value = $cache->get($key);
 		# print $value;
 		my $object = $cache->get_object($key);
-		print "\tExpires: ", $object->expires_at(), "\n";
-		print "\tCreated: ", $object->created_at(), "\n";
+		print "\t\tExpires: ", $object->expires_at(), "\n";
+		print "\t\tCreated: ", $object->created_at(), "\n";
 	}
 }
