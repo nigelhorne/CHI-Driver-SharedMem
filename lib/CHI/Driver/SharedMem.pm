@@ -202,10 +202,11 @@ sub get_namespaces {
 sub _build_shm {
 	my $self = shift;
 
-	# if((!defined($self->size())) || ($self->size() == 0)) {
+	if((!defined($self->size())) || ($self->size() == 0)) {
+		# Probably some strange condition in cleanup
 		# croak 'Size == 0';
-		# return;
-	# }
+		return;
+	}
 	my $shm = IPC::SharedMem->new($self->shmkey(), $self->size(), S_IRUSR|S_IWUSR);
 	unless($shm) {
 		$shm = IPC::SharedMem->new($self->shmkey(), $self->size(), S_IRUSR|S_IWUSR|IPC_CREAT);
@@ -247,7 +248,9 @@ sub _lock {
 sub _unlock {
 	my $self = shift;
 
-	flock($self->lock(), Fcntl::LOCK_UN);
+	if(my $lock = $self->lock()) {
+		flock($lock, Fcntl::LOCK_UN);
+	}
 }
 
 # The area must be locked by the caller
@@ -318,7 +321,7 @@ sub DEMOLISH {
 	my $self = shift;
 
 	# open(my $tulip, '>>', '/tmp/tulip');
-	if($self->shmkey()) {
+	if($self->shmkey() && $self->shm()) {
 		my $cur_size;
 		$self->_lock(type => 'write');
 		$cur_size = $self->_data_size();
