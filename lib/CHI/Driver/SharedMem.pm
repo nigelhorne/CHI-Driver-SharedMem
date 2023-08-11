@@ -23,6 +23,7 @@ has 'lock' => (
 	is => 'ro',
 	builder => '_build_lock',
 );
+has 'lock_file' => (is => 'rw', isa => 'Str');
 has '_data_size' => (
 	is => 'rw',
 	isa => 'Int',
@@ -214,7 +215,12 @@ sub _build_shm {
 }
 
 sub _build_lock {
-	open(my $fd, '<', $0) || croak("$0: $!");
+	my $self = shift;
+
+	# open(my $fd, '<', $0) || croak("$0: $!");
+	# FIXME: make it unique for each object, not a singleton
+	$self->lock_file('/tmp/' . __PACKAGE__);
+	open(my $fd, '>', $self->lock_file());
 	return $fd;
 }
 
@@ -329,6 +335,9 @@ sub DEMOLISH {
 			$self->shm()->detach();
 		}
 		$self->_unlock();
+	}
+	if(my $lock_file = $self->lock_file()) {
+		unlink $lock_file;
 	}
 }
 
