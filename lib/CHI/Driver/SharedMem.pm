@@ -220,7 +220,7 @@ sub _build_lock {
 	# open(my $fd, '<', $0) || croak("$0: $!");
 	# FIXME: make it unique for each object, not a singleton
 	$self->lock_file('/tmp/' . __PACKAGE__);
-	open(my $fd, '>', $self->lock_file());
+	open(my $fd, '>', $self->lock_file()) || croak($self->lock_file(), ": $!");
 	return $fd;
 }
 
@@ -337,6 +337,7 @@ sub DEMOLISH {
 		$self->_unlock();
 	}
 	if(my $lock_file = $self->lock_file()) {
+		close $self->lock();
 		unlink $lock_file;
 	}
 }
