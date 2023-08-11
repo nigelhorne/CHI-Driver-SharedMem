@@ -1,7 +1,7 @@
 #!/usr/bin/env perl
 
 use CHI;
-# use Data::Dumper;
+use Data::Dumper;
 
 my $cache = CHI->new(driver => 'SharedMem', shmkey => 98766789);
 
@@ -12,7 +12,9 @@ foreach my $n ($cache->get_namespaces()) {
 
 	foreach my $key($cache->get_keys($n)) {
 		print "\t$key: ", $cache->is_valid($key), "\n";
-		my $value = $cache->get($key);
-		print $value;
+		# my $value = $cache->get($key);
+		# print $value;
+		my $object = $cache->get_object();
+		print Data::Dumper->new([$object])->Dump();
 	}
 }
