@@ -1,6 +1,6 @@
 Revision history for CHI::Driver::SharedMem
 
-0.16
+0.16	Fri Aug 11 16:04:17 EDT 2023
 	Use a common lock - previously locks were app named
 	Fix occasional errors in DEMOLISH trying to lock the file after it's
 		gone away
