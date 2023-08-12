@@ -4,7 +4,7 @@ use strict;
 use warnings;
 use IPC::SysV qw(S_IRUSR S_IWUSR);
 use IPC::SharedMem;
-use Test::Most tests => 3;
+use Test::Most tests => 4;
 use Test::NoWarnings;
 
 use_ok('CHI');
@@ -18,13 +18,15 @@ if(defined($shm = IPC::SharedMem->new($shmkey, $size, S_IRUSR|S_IWUSR))) {
 }
 
 {
-	my $s = CHI->new(driver => 'SharedMem', size => $size, shmkey => $shmkey);
+	my $s = CHI->new(driver => 'SharedMem', size => $size, shmkey => $shmkey, max_size => $size);
 
 	$s->on_set_error('warn');
-	# FIXME: Why does this succeed if the size is too small?
-	$s->set('xyzzy', 'x' x 80, '5 mins');
 
-	ok($s->get('xyzzy') eq 'x' x 80);
+	$s->set('xyzzy', 'x' x 10, '5 mins');
+	ok($s->get('xyzzy') eq 'x' x 10);
+
+	$s->set('xyzzy', 'x' x 80, '5 mins');
+	ok(!defined($s->get('xyzzy')));
 }
 
 # Remove the shared memory area we've just created.

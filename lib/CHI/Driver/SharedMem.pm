@@ -69,6 +69,7 @@ See L<IPC::SharedMem> for more information.
     my $cache = CHI->new(
 	driver => 'SharedMem',
 	size => 8 * 1024,
+	max_size => 8 * 1024,
 	shmkey => 12344321,	# Choose something unique, but the same across
 				# all caches so that namespaces will be shared,
 				# but we won't step on any other shm areas
@@ -120,9 +121,15 @@ Retrieves an object from the cache
 sub fetch {
 	my($self, $key) = @_;
 
+	open(my $tulip, '>>', '/tmp/tulip');
+	print $tulip __LINE__, "\n";
 	$self->_lock(type => 'read');
+	print $tulip __LINE__, "\n";
 	my $rc = $self->_data()->{$self->namespace()}->{$key};
+	print $tulip __LINE__, "\n";
 	$self->_unlock();
+	print $tulip __LINE__, "\n";
+	close $tulip;
 	return $rc;
 }
 
@@ -201,20 +208,24 @@ sub get_namespaces {
 # The area must be locked by the caller
 sub _build_shm {
 	my $self = shift;
+	my $shm_size = $self->size();
 
-	if((!defined($self->size())) || ($self->size() == 0)) {
+	if((!defined($shm_size)) || ($shm_size == 0)) {
 		# Probably some strange condition in cleanup
 		# croak 'Size == 0';
 		return;
 	}
-	# Causes tests to crash
-	# $self->{is_size_aware} = 1;
-	# $self->{max_size} = $self->size();
-	my $shm = IPC::SharedMem->new($self->shmkey(), $self->size(), S_IRUSR|S_IWUSR);
+	# Note that if shm_size is different from an existing shared memory area,
+	#	this will fail
+	my $shm = IPC::SharedMem->new($self->shmkey(), $shm_size, S_IRUSR|S_IWUSR);
 	unless($shm) {
-		$shm = IPC::SharedMem->new($self->shmkey(), $self->size(), S_IRUSR|S_IWUSR|IPC_CREAT);
+		if($self->{is_size_aware} && $self->{max_size}) {
+			# Give an overhead for meta data
+			$shm_size = $self->{max_size} * 2;
+		}
+		$shm = IPC::SharedMem->new($self->shmkey(), $shm_size, S_IRUSR|S_IWUSR|IPC_CREAT);
 		unless($shm) {
-			croak "Couldn't create a shared memory area with key ",
+			croak "Couldn't create a shared memory area of $shm_size bytes with key ",
 				$self->shmkey(), ": $!";
 			return;
 		}
@@ -230,29 +241,46 @@ sub _build_lock {
 	# open(my $fd, '<', $0) || croak("$0: $!");
 	# FIXME: make it unique for each object, not a singleton
 	$self->lock_file('/tmp/' . __PACKAGE__);
+	open(my $tulip, '>>', '/tmp/tulip');
+	print $tulip "build_lock\n", $self->lock_file(), "\n";
 	open(my $fd, '>', $self->lock_file()) || croak($self->lock_file(), ": $!");
 	return $fd;
 }
 
 sub _lock {
+	return;
+
 	my ($self, %params) = @_;
 
+	open(my $tulip, '>>', '/tmp/tulip');
+	print $tulip $params{'type'}, ' lock ', $self->lock_file(), "\n";
+	my $i = 0;
+	while((my @call_details = (caller($i++)))) {
+		print $tulip "\t", $call_details[1], ':', $call_details[2], ' in function ', $call_details[3], "\n";
+	}
 	return unless $self->lock_file();
 
 	if(my $lock = $self->lock()) {
 		flock($lock, ($params{type} eq 'read') ? Fcntl::LOCK_SH : Fcntl::LOCK_EX);
 	} else {
-		# open(my $tulip, '>>', '/tmp/tulip');
-		# print $tulip "lost lock ", $self->lock_file(), "\n";
+		open(my $tulip, '>>', '/tmp/tulip');
+		print $tulip 'lost lock ', $self->lock_file(), "\n";
 		croak('Lost lock: ', $self->lock_file());
 	}
 }
 
 sub _unlock {
+	return;
+
 	my $self = shift;
 
+	open(my $tulip, '>>', '/tmp/tulip');
+	print $tulip 'unlock ', $self->lock_file(), "\n";
 	if(my $lock = $self->lock()) {
 		flock($lock, Fcntl::LOCK_UN);
+	} else {
+		print $tulip 'lost lock for unlock ', $self->lock_file(), "\n";
+		croak('Lost lock for unlock: ', $self->lock_file());
 	}
 }
 
@@ -278,22 +306,24 @@ sub _data_size {
 sub _data {
 	my($self, $h) = @_;
 
+	open(my $tulip, '>>', '/tmp/tulip');
+	print $tulip __LINE__, "\n";
 	if(defined($h)) {
 		my $f = JSON::MaybeXS->new()->ascii()->encode($h);
 		my $cur_size = length($f);
 		$self->shm()->write($f, $Config{intsize}, $cur_size);
 		$self->_data_size($cur_size);
-		# open(my $tulip, '>>', '/tmp/tulip');
-		# print $tulip "set: $cur_size bytes\n";
+		print $tulip "set: $cur_size bytes\n";
+		close $tulip;
 		return $h;
 	}
 	my $cur_size = $self->_data_size();
-	# open(my $tulip, '>>', '/tmp/tulip');
-	# print $tulip "get: $cur_size bytes\n";
-	unless($cur_size) {
-		return {};
+	print $tulip "get: $cur_size bytes\n";
+	close $tulip;
+	if($cur_size) {
+		return JSON::MaybeXS->new()->ascii()->decode($self->shm()->read($Config{intsize}, $cur_size));
 	}
-	return JSON::MaybeXS->new()->ascii()->decode($self->shm()->read($Config{intsize}, $cur_size));
+	return {};
 }
 
 =head2 BUILD
@@ -308,6 +338,7 @@ sub BUILD {
 	unless($self->shmkey()) {
 		croak 'CHI::Driver::SharedMem - no key given';
 	}
+	$| = 1;
 }
 
 =head2 DEMOLISH
@@ -318,12 +349,13 @@ it's safe to remove it and reclaim the memory.
 =cut
 
 sub DEMOLISH {
-	if(defined($^V) && ($^V ge 'v5.14.0')) {
-		return if ${^GLOBAL_PHASE} eq 'DESTRUCT';	# >= 5.14.0 only
-	}
+	# if(defined($^V) && ($^V ge 'v5.14.0')) {
+		# return if ${^GLOBAL_PHASE} eq 'DESTRUCT';	# >= 5.14.0 only
+	# }
 	my $self = shift;
 
-	# open(my $tulip, '>>', '/tmp/tulip');
+	open(my $tulip, '>>', '/tmp/tulip');
+	print $tulip "DEMOLISH\n";
 	if($self->shmkey() && $self->shm()) {
 		my $cur_size;
 		$self->_lock(type => 'write');
@@ -365,7 +397,8 @@ sub DEMOLISH {
 			$self->lock_file(undef);
 			close $self->lock();
 			unlink $lock_file;
-			# print $tulip "unlink $lock_file\n";
+			print $tulip "unlink $lock_file\n";
+			close $tulip;
 		}
 	}
 }
@@ -379,6 +412,12 @@ Nigel Horne, C<< <njh at bandsman.co.uk> >>
 Please report any bugs or feature requests to C<bug-chi-driver-sharedmem at rt.cpan.org>, or through
 the web interface at L<http://rt.cpan.org/NoAuth/ReportBug.html?Queue=CHI-Driver-SharedMem>.  I will be notified, and then you'll
 automatically be notified of progress on your bug as I make changes.
+
+The size argument should be deprecated in favour of the CHI standard max_size argument.
+
+Max_size is handled, but if you're not consistent across the calls to each cache,
+the results are unpredictable because it's used to create the size of the shared memory
+area.
 
 =head1 SEE ALSO
 
