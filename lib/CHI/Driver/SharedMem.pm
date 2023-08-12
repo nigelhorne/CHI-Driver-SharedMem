@@ -68,7 +68,6 @@ See L<IPC::SharedMem> for more information.
     use CHI;
     my $cache = CHI->new(
 	driver => 'SharedMem',
-	size => 8 * 1024,
 	max_size => 8 * 1024,
 	shmkey => 12344321,	# Choose something unique, but the same across
 				# all caches so that namespaces will be shared,
@@ -411,8 +410,6 @@ Nigel Horne, C<< <njh at bandsman.co.uk> >>
 Please report any bugs or feature requests to C<bug-chi-driver-sharedmem at rt.cpan.org>, or through
 the web interface at L<http://rt.cpan.org/NoAuth/ReportBug.html?Queue=CHI-Driver-SharedMem>.  I will be notified, and then you'll
 automatically be notified of progress on your bug as I make changes.
-
-The size argument should be deprecated in favour of the CHI standard max_size argument.
 
 Max_size is handled, but if you're not consistent across the calls to each cache,
 the results are unpredictable because it's used to create the size of the shared memory
