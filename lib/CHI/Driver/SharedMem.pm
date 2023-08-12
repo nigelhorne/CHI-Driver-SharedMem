@@ -207,6 +207,9 @@ sub _build_shm {
 		# croak 'Size == 0';
 		return;
 	}
+	# Causes tests to crash
+	# $self->{is_size_aware} = 1;
+	# $self->{max_size} = $self->size();
 	my $shm = IPC::SharedMem->new($self->shmkey(), $self->size(), S_IRUSR|S_IWUSR);
 	unless($shm) {
 		$shm = IPC::SharedMem->new($self->shmkey(), $self->size(), S_IRUSR|S_IWUSR|IPC_CREAT);
