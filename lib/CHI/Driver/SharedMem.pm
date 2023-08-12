@@ -68,6 +68,7 @@ See L<IPC::SharedMem> for more information.
     use CHI;
     my $cache = CHI->new(
 	driver => 'SharedMem',
+	size => 8 * 1024,
 	max_size => 8 * 1024,
 	shmkey => 12344321,	# Choose something unique, but the same across
 				# all caches so that namespaces will be shared,
@@ -219,6 +220,8 @@ sub _build_shm {
 	my $shm = IPC::SharedMem->new($self->shmkey(), $shm_size, S_IRUSR|S_IWUSR);
 	unless($shm) {
 		if($self->{is_size_aware} && $self->{max_size}) {
+			# TODO: this test should be in BUILD
+			croak 'size != max_size' if($shm_size != $self->{max_size});
 			# Give an overhead for meta data
 			$shm_size = $self->{max_size} * 2;
 		}
@@ -414,6 +417,8 @@ automatically be notified of progress on your bug as I make changes.
 Max_size is handled, but if you're not consistent across the calls to each cache,
 the results are unpredictable because it's used to create the size of the shared memory
 area.
+
+The size argument should be deprecated and only the max_size argument used.
 
 =head1 SEE ALSO
 
