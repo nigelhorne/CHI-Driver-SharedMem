@@ -18,7 +18,7 @@ extends 'CHI::Driver';
 
 has 'shmkey' => (is => 'ro', isa => 'Int');
 has 'shm' => (is => 'ro', builder => '_build_shm', lazy => 1);
-has 'size' => (is => 'ro', isa => 'Int', default => 8 * 1024);
+has 'size' => (is => 'rw', isa => 'Int', default => 8 * 1024);
 has 'lock' => (
 	is => 'ro',
 	builder => '_build_lock',
@@ -222,8 +222,9 @@ sub _build_shm {
 		if($self->{is_size_aware} && $self->{max_size}) {
 			# TODO: this test should be in BUILD
 			croak 'size != max_size' if($shm_size != $self->{max_size});
-			# Give an overhead for meta data
-			$shm_size = $self->{max_size} * 2;
+			# Give an overhead for the JSON encoding
+			$shm_size = $self->{max_size} * 3;
+			$self->size($shm_size);
 		}
 		$shm = IPC::SharedMem->new($self->shmkey(), $shm_size, S_IRUSR|S_IWUSR|IPC_CREAT);
 		unless($shm) {
