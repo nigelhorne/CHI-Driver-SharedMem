@@ -225,6 +225,8 @@ sub _build_shm {
 			# Give an overhead for the JSON encoding
 			$shm_size = $self->{max_size} * 3;
 			$self->size($shm_size);
+		} else {
+			$shm_size *= 3;
 		}
 		$shm = IPC::SharedMem->new($self->shmkey(), $shm_size, S_IRUSR|S_IWUSR|IPC_CREAT);
 		unless($shm) {
