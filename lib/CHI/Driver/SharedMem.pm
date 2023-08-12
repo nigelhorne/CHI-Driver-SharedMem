@@ -121,15 +121,15 @@ Retrieves an object from the cache
 sub fetch {
 	my($self, $key) = @_;
 
-	open(my $tulip, '>>', '/tmp/tulip');
-	print $tulip __LINE__, "\n";
+	# open(my $tulip, '>>', '/tmp/tulip');
+	# print $tulip __LINE__, "\n";
 	$self->_lock(type => 'read');
-	print $tulip __LINE__, "\n";
+	# print $tulip __LINE__, "\n";
 	my $rc = $self->_data()->{$self->namespace()}->{$key};
-	print $tulip __LINE__, "\n";
+	# print $tulip __LINE__, "\n";
 	$self->_unlock();
-	print $tulip __LINE__, "\n";
-	close $tulip;
+	# print $tulip __LINE__, "\n";
+	# close $tulip;
 	return $rc;
 }
 
@@ -241,8 +241,8 @@ sub _build_lock {
 	# open(my $fd, '<', $0) || croak("$0: $!");
 	# FIXME: make it unique for each object, not a singleton
 	$self->lock_file('/tmp/' . __PACKAGE__);
-	open(my $tulip, '>>', '/tmp/tulip');
-	print $tulip "build_lock\n", $self->lock_file(), "\n";
+	# open(my $tulip, '>>', '/tmp/tulip');
+	# print $tulip "build_lock\n", $self->lock_file(), "\n";
 	open(my $fd, '>', $self->lock_file()) || croak($self->lock_file(), ": $!");
 	return $fd;
 }
@@ -252,19 +252,18 @@ sub _lock {
 
 	my ($self, %params) = @_;
 
-	open(my $tulip, '>>', '/tmp/tulip');
-	print $tulip $params{'type'}, ' lock ', $self->lock_file(), "\n";
-	my $i = 0;
-	while((my @call_details = (caller($i++)))) {
-		print $tulip "\t", $call_details[1], ':', $call_details[2], ' in function ', $call_details[3], "\n";
-	}
+	# open(my $tulip, '>>', '/tmp/tulip');
+	# print $tulip $params{'type'}, ' lock ', $self->lock_file(), "\n";
+	# my $i = 0;
+	# while((my @call_details = (caller($i++)))) {
+		# print $tulip "\t", $call_details[1], ':', $call_details[2], ' in function ', $call_details[3], "\n";
+	# }
 	return unless $self->lock_file();
 
 	if(my $lock = $self->lock()) {
 		flock($lock, ($params{type} eq 'read') ? Fcntl::LOCK_SH : Fcntl::LOCK_EX);
 	} else {
-		open(my $tulip, '>>', '/tmp/tulip');
-		print $tulip 'lost lock ', $self->lock_file(), "\n";
+		# print $tulip 'lost lock ', $self->lock_file(), "\n";
 		croak('Lost lock: ', $self->lock_file());
 	}
 }
@@ -274,12 +273,12 @@ sub _unlock {
 
 	my $self = shift;
 
-	open(my $tulip, '>>', '/tmp/tulip');
-	print $tulip 'unlock ', $self->lock_file(), "\n";
+	# open(my $tulip, '>>', '/tmp/tulip');
+	# print $tulip 'unlock ', $self->lock_file(), "\n";
 	if(my $lock = $self->lock()) {
 		flock($lock, Fcntl::LOCK_UN);
 	} else {
-		print $tulip 'lost lock for unlock ', $self->lock_file(), "\n";
+		# print $tulip 'lost lock for unlock ', $self->lock_file(), "\n";
 		croak('Lost lock for unlock: ', $self->lock_file());
 	}
 }
@@ -306,20 +305,20 @@ sub _data_size {
 sub _data {
 	my($self, $h) = @_;
 
-	open(my $tulip, '>>', '/tmp/tulip');
-	print $tulip __LINE__, "\n";
+	# open(my $tulip, '>>', '/tmp/tulip');
+	# print $tulip __LINE__, "\n";
 	if(defined($h)) {
 		my $f = JSON::MaybeXS->new()->ascii()->encode($h);
 		my $cur_size = length($f);
 		$self->shm()->write($f, $Config{intsize}, $cur_size);
 		$self->_data_size($cur_size);
-		print $tulip "set: $cur_size bytes\n";
-		close $tulip;
+		# print $tulip "set: $cur_size bytes\n";
+		# close $tulip;
 		return $h;
 	}
 	my $cur_size = $self->_data_size();
-	print $tulip "get: $cur_size bytes\n";
-	close $tulip;
+	# print $tulip "get: $cur_size bytes\n";
+	# close $tulip;
 	if($cur_size) {
 		return JSON::MaybeXS->new()->ascii()->decode($self->shm()->read($Config{intsize}, $cur_size));
 	}
@@ -354,8 +353,8 @@ sub DEMOLISH {
 	# }
 	my $self = shift;
 
-	open(my $tulip, '>>', '/tmp/tulip');
-	print $tulip "DEMOLISH\n";
+	# open(my $tulip, '>>', '/tmp/tulip');
+	# print $tulip "DEMOLISH\n";
 	if($self->shmkey() && $self->shm()) {
 		my $cur_size;
 		$self->_lock(type => 'write');
@@ -397,8 +396,8 @@ sub DEMOLISH {
 			$self->lock_file(undef);
 			close $self->lock();
 			unlink $lock_file;
-			print $tulip "unlink $lock_file\n";
-			close $tulip;
+			# print $tulip "unlink $lock_file\n";
+			# close $tulip;
 		}
 	}
 }
