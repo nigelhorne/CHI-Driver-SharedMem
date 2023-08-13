@@ -346,7 +346,7 @@ sub _data {
 		my $f = JSON::MaybeXS->new()->ascii()->encode($h);
 		my $cur_size = length($f);
 		# print $tulip __LINE__, "cmp $cur_size > ", $self->size(), "\n";
-		if($cur_size > $self->shm_size()) {
+		if($cur_size > ($self->shm_size() - $Config{intsize})) {
 			croak("sharedmem set failed - value too large? ($cur_size bytes) > ", $self->shm_size());
 		}
 		$self->shm()->write($f, $Config{intsize}, $cur_size);
@@ -359,16 +359,16 @@ sub _data {
 	# print $tulip "get: $cur_size bytes\n";
 	# close $tulip;
 	if($cur_size) {
-		# my $rc;
-		# eval {
-			# $rc = JSON::MaybeXS->new()->ascii()->decode($self->shm()->read($Config{intsize}, $cur_size));
-		# };
-		# if($@) {
-			# $self->_data_size(0);
-			# croak($@);
-		# }
-		# return $rc;
-		return JSON::MaybeXS->new()->ascii()->decode($self->shm()->read($Config{intsize}, $cur_size));
+		my $rc;
+		eval {
+			$rc = JSON::MaybeXS->new()->ascii()->decode($self->shm()->read($Config{intsize}, $cur_size));
+		};
+		if($@) {
+			$self->_data_size(0);
+			croak($@);
+		}
+		return $rc;
+		# return JSON::MaybeXS->new()->ascii()->decode($self->shm()->read($Config{intsize}, $cur_size));
 	}
 	return {};
 }
