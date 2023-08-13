@@ -1,5 +1,8 @@
 Revision history for CHI::Driver::SharedMem
 
+0.18
+	Implement LRU when the shared memory segment is full
+
 0.17	Sat Aug 12 21:41:26 EDT 2023
 	Dabble without a locking system, let's see if CHI can handle that
 	API Change: size is now shm_size; shmkey is now shm_key

@@ -6,6 +6,7 @@ package CHI::Driver::SharedMem;
 
 use warnings;
 use strict;
+use CHI::Constants qw(CHI_Meta_Namespace);
 use Moose;
 use IPC::SysV qw(S_IRUSR S_IWUSR IPC_CREAT);
 use IPC::SharedMem;
@@ -108,6 +109,9 @@ sub store {
 	$self->_lock(type => 'write');
 	my $h = $self->_data();
 	$h->{$self->namespace()}->{$key} = $value;
+	if($self->{is_size_aware}) {
+		$h->{CHI_Meta_Namespace()}->{last_used_time}->{$key} = time;
+	}
 	$self->_data($h);
 	$self->_unlock();
 }
@@ -127,6 +131,12 @@ sub fetch {
 	# print $tulip __LINE__, "\n";
 	my $rc = $self->_data()->{$self->namespace()}->{$key};
 	# print $tulip __LINE__, "\n";
+	if($self->{is_size_aware}) {
+		$self->_lock(type => 'write');
+		my $h = $self->_data();
+		$h->{CHI_Meta_Namespace()}->{last_used_time}->{$key} = time;
+		$self->_data($h);
+	}
 	$self->_unlock();
 	# print $tulip __LINE__, "\n";
 	# close $tulip;
@@ -145,6 +155,7 @@ sub remove {
 	$self->_lock(type => 'write');
 	my $h = $self->_data();
 	delete $h->{$self->namespace()}->{$key};
+	delete $h->{CHI_Meta_Namespace()}->{last_used_time}->{$key};
 	$self->_data($h);
 	$self->_unlock();
 
@@ -201,6 +212,34 @@ sub get_namespaces {
 	# Needs to be sorted for RT89892
 	my @rc = sort keys(%{$rc});
 	return @rc;
+}
+
+=head2 default_discard_policy
+
+Use an LRU algorithm to discard items when the cache can't add anything
+
+=cut
+
+sub default_discard_policy { 'lru' }
+
+=head2 discard_policy_lru
+
+When the Shared memory area is getting close to full, discard the least recently used objects
+
+=cut
+
+sub discard_policy_lru {
+	# return;	# debugging why I get uninitialized values in the sort
+	my $self = shift;
+
+	$self->_lock(type => 'read');
+	my $last_used_time = $self->_data()->{CHI_Meta_Namespace()}->{last_used_time};
+	$self->_unlock();
+	my @keys_in_lru_order =
+		sort { $last_used_time->{$a} <=> $last_used_time->{$b} } $self->get_keys;
+	return sub {
+		shift(@keys_in_lru_order);
+	};
 }
 
 # Internal routines
@@ -320,6 +359,15 @@ sub _data {
 	# print $tulip "get: $cur_size bytes\n";
 	# close $tulip;
 	if($cur_size) {
+		# my $rc;
+		# eval {
+			# $rc = JSON::MaybeXS->new()->ascii()->decode($self->shm()->read($Config{intsize}, $cur_size));
+		# };
+		# if($@) {
+			# $self->_data_size(0);
+			# croak($@);
+		# }
+		# return $rc;
 		return JSON::MaybeXS->new()->ascii()->decode($self->shm()->read($Config{intsize}, $cur_size));
 	}
 	return {};
