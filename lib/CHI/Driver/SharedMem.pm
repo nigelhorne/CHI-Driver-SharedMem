@@ -230,6 +230,8 @@ sub _build_shm {
 }
 
 sub _build_lock {
+	return;
+
 	my $self = shift;
 
 	# open(my $fd, '<', $0) || croak("$0: $!");
