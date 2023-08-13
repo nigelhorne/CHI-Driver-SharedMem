@@ -3,6 +3,7 @@ Revision history for CHI::Driver::SharedMem
 0.17
 	Dabble without a locking system, let's see if CHI can handle that
 	Use max_size if set - it's preferrable over the size argument
+	API Change: size is now shm_size; shmkey is now shm_key
 
 0.16	Fri Aug 11 16:04:17 EDT 2023
 	Use a common lock - previously locks were app named

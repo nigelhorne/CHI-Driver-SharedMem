@@ -16,9 +16,9 @@ use Fcntl;
 
 extends 'CHI::Driver';
 
-has 'shmkey' => (is => 'ro', isa => 'Int');
+has 'shm_key' => (is => 'ro', isa => 'Int');
 has 'shm' => (is => 'ro', builder => '_build_shm', lazy => 1);
-has 'size' => (is => 'rw', isa => 'Int', default => 8 * 1024);
+has 'shm_size' => (is => 'rw', isa => 'Int', default => 8 * 1024);
 has 'lock' => (
 	is => 'ro',
 	builder => '_build_lock',
@@ -68,9 +68,9 @@ See L<IPC::SharedMem> for more information.
     use CHI;
     my $cache = CHI->new(
 	driver => 'SharedMem',
-	size => 8 * 1024,
-	max_size => 8 * 1024,
-	shmkey => 12344321,	# Choose something unique, but the same across
+	max_size => 8 * 1024,	# Size of the cache
+	shm_size => 32 * 1024,	# Size of the shared memory area
+	shm_key => 12344321,	# Choose something unique, but the same across
 				# all caches so that namespaces will be shared,
 				# but we won't step on any other shm areas
     );
@@ -208,30 +208,19 @@ sub get_namespaces {
 # The area must be locked by the caller
 sub _build_shm {
 	my $self = shift;
-	my $shm_size = $self->size();
+	my $shm_size = $self->shm_size();
 
 	if((!defined($shm_size)) || ($shm_size == 0)) {
 		# Probably some strange condition in cleanup
 		# croak 'Size == 0';
 		return;
 	}
-	# Note that if shm_size is different from an existing shared memory area,
-	#	this will fail
-	my $shm = IPC::SharedMem->new($self->shmkey(), $shm_size, S_IRUSR|S_IWUSR);
+	my $shm = IPC::SharedMem->new($self->shm_key(), $shm_size, S_IRUSR|S_IWUSR);
 	unless($shm) {
-		if($self->{is_size_aware} && $self->{max_size}) {
-			# TODO: this test should be in BUILD
-			croak 'size != max_size' if($shm_size != $self->{max_size});
-			# Give an overhead for the JSON encoding
-			$shm_size = $self->{max_size} * 3;
-			$self->size($shm_size);
-		} else {
-			$shm_size *= 3;
-		}
-		$shm = IPC::SharedMem->new($self->shmkey(), $shm_size, S_IRUSR|S_IWUSR|IPC_CREAT);
+		$shm = IPC::SharedMem->new($self->shm_key(), $shm_size, S_IRUSR|S_IWUSR|IPC_CREAT);
 		unless($shm) {
 			croak "Couldn't create a shared memory area of $shm_size bytes with key ",
-				$self->shmkey(), ": $!";
+				$self->shm_key(), ": $!";
 			return;
 		}
 		$shm->write(pack('I', 0), 0, $Config{intsize});
@@ -315,6 +304,10 @@ sub _data {
 	if(defined($h)) {
 		my $f = JSON::MaybeXS->new()->ascii()->encode($h);
 		my $cur_size = length($f);
+		# print $tulip __LINE__, "cmp $cur_size > ", $self->size(), "\n";
+		if($cur_size > $self->shm_size()) {
+			croak("sharedmem set failed - value too large? ($cur_size bytes) > ", $self->shm_size());
+		}
 		$self->shm()->write($f, $Config{intsize}, $cur_size);
 		$self->_data_size($cur_size);
 		# print $tulip "set: $cur_size bytes\n";
@@ -339,7 +332,7 @@ Constructor - validate arguments
 sub BUILD {
 	my $self = shift;
 
-	unless($self->shmkey()) {
+	unless($self->shm_key()) {
 		croak 'CHI::Driver::SharedMem - no key given';
 	}
 	$| = 1;
@@ -360,7 +353,7 @@ sub DEMOLISH {
 
 	# open(my $tulip, '>>', '/tmp/tulip');
 	# print $tulip "DEMOLISH\n";
-	if($self->shmkey() && $self->shm()) {
+	if($self->shm_key() && $self->shm()) {
 		my $cur_size;
 		$self->_lock(type => 'write');
 		$cur_size = $self->_data_size();

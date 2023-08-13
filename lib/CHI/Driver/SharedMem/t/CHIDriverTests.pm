@@ -49,8 +49,8 @@ sub new_cache_options {
 	return (
 	    $self->SUPER::new_cache_options(),
 	    driver => '+CHI::Driver::SharedMem',
-	    size => $main::size,
-	    shmkey => $main::shmkey,
+	    shm_size => $main::shm_size,
+	    shm_key => $main::shm_key,
 	);
 }
 
@@ -70,7 +70,7 @@ sub test_shmkey_required : Tests {
 		ok($@ =~ /CHI::Driver::SharedMem - no key given/);
 		ok(!defined($cache));
 	} else {
-		ok(0, 'Allowed shmkey to be undefined');
+		ok(0, 'Allowed shm_key to be undefined');
 	}
 }
 
