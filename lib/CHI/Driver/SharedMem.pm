@@ -46,11 +46,11 @@ CHI::Driver::SharedMem - Cache data in shared memory
 
 =head1 VERSION
 
-Version 0.16
+Version 0.17
 
 =cut
 
-our $VERSION = '0.16';
+our $VERSION = '0.17';
 
 # FIXME - get the pod documentation right so that the layout of the memory
 # area looks correct in the man page
@@ -414,7 +414,7 @@ Max_size is handled, but if you're not consistent across the calls to each cache
 the results are unpredictable because it's used to create the size of the shared memory
 area.
 
-The size argument should be deprecated and only the max_size argument used.
+The shm_size argument should be deprecated and only the max_size argument used.
 
 =head1 SEE ALSO
 
