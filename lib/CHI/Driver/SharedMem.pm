@@ -69,7 +69,7 @@ See L<IPC::SharedMem> for more information.
     use CHI;
     my $cache = CHI->new(
 	driver => 'SharedMem',
-	max_size => 8 * 1024,	# Size of the cache
+	max_size => 2 * 1024,	# Size of the cache
 	shm_size => 32 * 1024,	# Size of the shared memory area
 	shm_key => 12344321,	# Choose something unique, but the same across
 				# all caches so that namespaces will be shared,
