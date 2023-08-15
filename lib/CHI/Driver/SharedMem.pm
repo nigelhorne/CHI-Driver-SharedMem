@@ -109,9 +109,9 @@ sub store {
 	$self->_lock(type => 'write');
 	my $h = $self->_data();
 	$h->{$self->namespace()}->{$key} = $value;
-	if($self->{is_size_aware}) {
-		$h->{CHI_Meta_Namespace()}->{last_used_time}->{$key} = time;
-	}
+	# if($self->{is_size_aware}) {
+		# $h->{CHI_Meta_Namespace()}->{last_used_time}->{$key} = time;
+	# }
 	$self->_data($h);
 	$self->_unlock();
 }
@@ -236,7 +236,7 @@ sub discard_policy_lru {
 	my $last_used_time = $self->_data()->{CHI_Meta_Namespace()}->{last_used_time};
 	$self->_unlock();
 	my @keys_in_lru_order =
-		sort { $last_used_time->{$a} <=> $last_used_time->{$b} } $self->get_keys;
+		sort { $last_used_time->{$a} <=> $last_used_time->{$b} } $self->get_keys();
 	return sub {
 		shift(@keys_in_lru_order);
 	};
