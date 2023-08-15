@@ -31,8 +31,7 @@ WriteMakefile(
 	'Date::Parse' => 0,	# Used by CHI::Test but not a prereq of it
 	# 'Test::Kwalitee' => 0,
 	'Test::Requires' => 0,
-    },
-    PREREQ_PM => {
+    }, PREREQ_PM => {
 	'JSON::MaybeXS' => 0,
 	'Moose' => 0,
 	'IPC::SysV' => 0,
@@ -40,7 +39,9 @@ WriteMakefile(
 	'CHI' => 0.54,	# Needs latest CHI::Stats
 	'Config' => 0,
 	'Fcntl' => 0,
-    },
+    }, TEST_REQUIRES => {
+	'Test::Carp' => 0,
+	},
     dist                => { COMPRESS => 'gzip -9f', SUFFIX => 'gz', },
     clean               => { FILES => 'CHI-Driver-SharedMem-*' },
     META_MERGE		=> {
