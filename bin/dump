@@ -2,6 +2,7 @@
 
 use CHI;
 # use Data::Dumper;
+use JSON::MaybeXS;
 
 my $cache = CHI->new(driver => 'SharedMem', shm_key => 98766789);
 
@@ -17,5 +18,7 @@ foreach my $n ($cache->get_namespaces()) {
 		my $object = $cache->get_object($key);
 		print "\t\tExpires: ", $object->expires_at(), "\n";
 		print "\t\tCreated: ", $object->created_at(), "\n";
+		my $value = { value => $object->value() };
+		print "\t\tValue: ", JSON::MaybeXS->new()->ascii()->encode($value), "\n";
 	}
 }
