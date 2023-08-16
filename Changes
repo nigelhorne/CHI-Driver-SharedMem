@@ -1,5 +1,8 @@
 Revision history for CHI::Driver::SharedMem
 
+0.19
+	Panic if the shm segment is lost
+
 0.18	Tue Aug 15 20:03:16 EDT 2023
 	Implement LRU when the shared memory segment is full
 

@@ -322,12 +322,13 @@ sub _unlock {
 sub _data_size {
 	my($self, $value) = @_;
 
+	if(!$self->shm()) {
+		croak __PACKAGE__, ': panic: _data_size has lost the shared memory segment';
+		return 0;
+	}
 	if(defined($value)) {
 		$self->shm()->write(pack('I', $value), 0, $Config{intsize});
 		return $value;
-	}
-	unless($self->shm()) {
-		return 0;
 	}
 	my $size = $self->shm()->read(0, $Config{intsize});
 	unless(defined($size)) {
