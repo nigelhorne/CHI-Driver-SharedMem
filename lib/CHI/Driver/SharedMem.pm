@@ -47,11 +47,11 @@ CHI::Driver::SharedMem - Cache data in shared memory
 
 =head1 VERSION
 
-Version 0.17
+Version 0.18
 
 =cut
 
-our $VERSION = '0.17';
+our $VERSION = '0.18';
 
 # FIXME - get the pod documentation right so that the layout of the memory
 # area looks correct in the man page
