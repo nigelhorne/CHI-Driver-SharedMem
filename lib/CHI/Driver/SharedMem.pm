@@ -112,7 +112,6 @@ sub store {
 		# $h->{CHI_Meta_Namespace()}->{'last_used_time'}->{$key} = time;
 	# }
 	$self->_data($h);
-	$self->_unlock();
 }
 
 =head2 fetch
@@ -134,7 +133,6 @@ sub fetch {
 		$h->{CHI_Meta_Namespace()}->{last_used_time}->{$key} = time;
 		$self->_data($h);
 	}
-	$self->_unlock();
 	# print $tulip __LINE__, "\n";
 	# close $tulip;
 	return $rc;
@@ -153,7 +151,6 @@ sub remove {
 	delete $h->{$self->namespace()}->{$key};
 	delete $h->{CHI_Meta_Namespace()}->{last_used_time}->{$key};
 	$self->_data($h);
-	$self->_unlock();
 
 	# open(my $tulip, '>>', '/tmp/tulip');
 	# print $tulip "remove: $key\n";
@@ -171,7 +168,6 @@ sub clear {
 	my $h = $self->_data();
 	delete $h->{$self->namespace()};
 	$self->_data($h);
-	$self->_unlock();
 
 	# open(my $tulip, '>>', '/tmp/tulip');
 	# print $tulip "clear ", $self->namespace(), "\n";
@@ -187,7 +183,6 @@ sub get_keys {
 	my $self = shift;
 
 	my $h = $self->_data();
-	$self->_unlock();
 	return(keys(%{$h->{$self->namespace()}}));
 }
 
@@ -201,7 +196,6 @@ sub get_namespaces {
 	my $self = shift;
 
 	my $rc = $self->_data();
-	$self->_unlock();
 	# Needs to be sorted for RT89892
 	my @rc = sort keys(%{$rc});
 	return @rc;
@@ -226,7 +220,6 @@ sub discard_policy_lru {
 	my $self = shift;
 
 	my $last_used_time = $self->_data()->{CHI_Meta_Namespace()}->{last_used_time};
-	$self->_unlock();
 	my @keys_in_lru_order =
 		sort { $last_used_time->{$a} <=> $last_used_time->{$b} } $self->get_keys();
 	return sub {
@@ -300,6 +293,10 @@ sub _unlock {
 
 	open(my $tulip, '>>', '/tmp/tulip');
 	print $tulip 'unlock ', $self->lock_file(), "\n";
+	my $i = 0;
+	while((my @call_details = (caller($i++)))) {
+		print $tulip "\t", $call_details[1], ':', $call_details[2], ' in function ', $call_details[3], "\n";
+	}
 	if(my $lock = $self->lock()) {
 		flock($lock, Fcntl::LOCK_UN);
 	} else {
@@ -407,9 +404,9 @@ sub DEMOLISH {
 	# print $tulip "DEMOLISH\n";
 	if($self->shm_key() && $self->shm()) {
 		my $cur_size;
-		$self->_lock(type => 'write');
 		$cur_size = $self->_data_size();
 		# print $tulip "DEMOLISH: $cur_size bytes\n";
+		$self->_lock(type => 'write');
 		my $can_remove = 0;
 		my $stat = $self->shm()->stat();
 		if($cur_size == 0) {
