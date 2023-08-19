@@ -336,7 +336,7 @@ sub _data {
 	open(my $tulip, '>>', '/tmp/tulip');
 	print $tulip __LINE__, "\n";
 	if(defined($h)) {
-		my $f = JSON::MaybeXS->new()->ascii()->encode($h);
+		my $f = JSON::MaybeXS->new()->ascii(1)->encode($h);
 		my $cur_size = length($f);
 		print $tulip __LINE__, " cmp $cur_size > ", $self->shm_size(), "\n";
 		if($cur_size > ($self->shm_size() - $Config{intsize})) {
@@ -358,16 +358,16 @@ sub _data {
 	if($cur_size) {
 		my $rc;
 		eval {
-			$rc = JSON::MaybeXS->new()->ascii()->decode($self->shm()->read($Config{intsize}, $cur_size));
+			$rc = JSON::MaybeXS->new()->ascii(1)->decode($self->shm()->read($Config{intsize}, $cur_size));
 		};
 		if($@) {
 			$self->_lock(type => 'write');
 			$self->_data_size(0);
 			$self->_unlock();
 			open(my $tulip, '>>', '/tmp/tulip');
-			print $tulip "Decode fail $@\n\t";
+			print $tulip "Decode fail $@\n";
 			my $foo = $self->shm()->read($Config{intsize}, $cur_size);
-			print $tulip "Decode fail $cur_size bytes $@\n\t$foo\n";
+			print $tulip "\tDecode fail $cur_size bytes $@\n\t$foo\n";
 			my $i = 0;
 			while((my @call_details = (caller($i++)))) {
 				print $tulip "\t", $call_details[1], ':', $call_details[2], ' in function ', $call_details[3], "\n";
@@ -375,7 +375,7 @@ sub _data {
 			croak($@);
 		}
 		return $rc;
-		# return JSON::MaybeXS->new()->ascii()->decode($self->shm()->read($Config{intsize}, $cur_size));
+		# return JSON::MaybeXS->new()->ascii(1)->decode($self->shm()->read($Config{intsize}, $cur_size));
 	}
 	return {};
 }
