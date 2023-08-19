@@ -364,6 +364,14 @@ sub _data {
 			$self->_lock(type => 'write');
 			$self->_data_size(0);
 			$self->_unlock();
+			open(my $tulip, '>>', '/tmp/tulip');
+			print $tulip "Decode fail $@\n\t";
+			my $foo = $self->shm()->read($Config{intsize}, $cur_size);
+			print $tulip "Decode fail $cur_size bytes $@\n\t$foo\n";
+			my $i = 0;
+			while((my @call_details = (caller($i++)))) {
+				print $tulip "\t", $call_details[1], ':', $call_details[2], ' in function ', $call_details[3], "\n";
+			}
 			croak($@);
 		}
 		return $rc;
