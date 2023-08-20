@@ -45,13 +45,13 @@ NEW: {
 			# diag('Ignore no key given message');
 			# warning_like
 				# { $cache = CHI->new(driver => 'SharedMem') }
-				# { carped => qr/CHI::Driver::SharedMem - no key given/ };
+				# { carped => qr/CHI::Driver::SharedMem - no shm_key given/ };
 
 			eval {
 				$cache = CHI->new(driver => 'SharedMem');
 			};
 			if($@) {
-				ok($@ =~ /CHI::Driver::SharedMem - no key given/);
+				ok($@ =~ /CHI::Driver::SharedMem - no shm_key given/);
 			} else {
 				ok(0, 'Allowed shmkey to be undefined');
 			}

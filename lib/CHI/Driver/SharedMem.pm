@@ -269,41 +269,41 @@ sub _build_lock {
 sub _lock {
 	my ($self, %params) = @_;
 
-	open(my $tulip, '>>', '/tmp/tulip');
-	print $tulip $params{'type'}, ' lock ', $self->lock_file(), "\n";
-	my $i = 0;
-	while((my @call_details = (caller($i++)))) {
-		print $tulip "\t", $call_details[1], ':', $call_details[2], ' in function ', $call_details[3], "\n";
-	}
+	# open(my $tulip, '>>', '/tmp/tulip');
+	# print $tulip $params{'type'}, ' lock ', $self->lock_file(), "\n";
+	# my $i = 0;
+	# while((my @call_details = (caller($i++)))) {
+		# print $tulip "\t", $call_details[1], ':', $call_details[2], ' in function ', $call_details[3], "\n";
+	# }
 	return unless $self->lock_file();
 
 	if(my $lock = $self->lock()) {
-		print $tulip "locking\n";
+		# rint $tulip "locking\n";
 		flock($lock, ($params{type} eq 'read') ? Fcntl::LOCK_SH : Fcntl::LOCK_EX);
 	} else {
-		print $tulip 'lost lock ', $self->lock_file(), "\n";
+		# rint $tulip 'lost lock ', $self->lock_file(), "\n";
 		croak('Lost lock: ', $self->lock_file());
 	}
-	print $tulip "locked\n";
-	close $tulip;
+	# print $tulip "locked\n";
+	# close $tulip;
 }
 
 sub _unlock {
 	my $self = shift;
 
-	open(my $tulip, '>>', '/tmp/tulip');
-	print $tulip 'unlock ', $self->lock_file(), "\n";
-	my $i = 0;
-	while((my @call_details = (caller($i++)))) {
-		print $tulip "\t", $call_details[1], ':', $call_details[2], ' in function ', $call_details[3], "\n";
-	}
+	# open(my $tulip, '>>', '/tmp/tulip');
+	# print $tulip 'unlock ', $self->lock_file(), "\n";
+	# my $i = 0;
+	# while((my @call_details = (caller($i++)))) {
+		# print $tulip "\t", $call_details[1], ':', $call_details[2], ' in function ', $call_details[3], "\n";
+	# }
 	if(my $lock = $self->lock()) {
 		flock($lock, Fcntl::LOCK_UN);
 	} else {
-		print $tulip 'lost lock for unlock ', $self->lock_file(), "\n";
+		# print $tulip 'lost lock for unlock ', $self->lock_file(), "\n";
 		croak('Lost lock for unlock: ', $self->lock_file());
 	}
-	close $tulip;
+	# close $tulip;
 }
 
 # The area must be locked by the caller
@@ -334,13 +334,18 @@ sub _data {
 	my($self, $h) = @_;
 
 	open(my $tulip, '>>', '/tmp/tulip');
-	print $tulip __LINE__, "\n";
+	# print $tulip __LINE__, "\n";
 	if(defined($h)) {
 		my $f = JSON::MaybeXS->new()->ascii(1)->encode($h);
 		my $cur_size = length($f);
 		print $tulip __LINE__, " cmp $cur_size > ", $self->shm_size(), "\n";
 		if($cur_size > ($self->shm_size() - $Config{intsize})) {
-			croak("sharedmem set failed - value too large? ($cur_size bytes) > ", $self->shm_size());
+			$self->_unlock();
+			croak("Sharedmem set failed - value too large? ($cur_size bytes) > ", $self->shm_size());
+		}
+		if($f !~ /\}$/) {
+			$self->_unlock();
+			croak("Encoding failed. ($cur_size bytes: $f) ");
 		}
 		$self->_lock(type => 'write');
 		$self->shm()->write($f, $Config{intsize}, $cur_size);
@@ -354,7 +359,6 @@ sub _data {
 	my $cur_size = $self->_data_size();
 	$self->_unlock();
 	print $tulip "get: $cur_size bytes\n";
-	close $tulip;
 	if($cur_size) {
 		my $rc;
 		eval {
@@ -364,8 +368,6 @@ sub _data {
 			$self->_lock(type => 'write');
 			$self->_data_size(0);
 			$self->_unlock();
-			open(my $tulip, '>>', '/tmp/tulip');
-			print $tulip "Decode fail $@\n";
 			my $foo = $self->shm()->read($Config{intsize}, $cur_size);
 			print $tulip "\tDecode fail $cur_size bytes $@\n\t$foo\n";
 			my $i = 0;
@@ -377,6 +379,7 @@ sub _data {
 		return $rc;
 		# return JSON::MaybeXS->new()->ascii(1)->decode($self->shm()->read($Config{intsize}, $cur_size));
 	}
+	close $tulip;
 	return {};
 }
 
@@ -390,7 +393,7 @@ sub BUILD {
 	my $self = shift;
 
 	unless($self->shm_key()) {
-		croak 'CHI::Driver::SharedMem - no key given';
+		croak 'CHI::Driver::SharedMem - no shm_key given';
 	}
 	$| = 1;
 }
