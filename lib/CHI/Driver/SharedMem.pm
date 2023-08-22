@@ -21,7 +21,7 @@ has 'shm_key' => (is => 'ro', isa => 'Int');
 has 'shm' => (is => 'ro', builder => '_build_shm', lazy => 1);
 has 'shm_size' => (is => 'rw', isa => 'Int', default => 8 * 1024);
 has 'lock_file' => (is => 'rw', isa => 'Str|Undef');
-has 'lock' => (	# TODO: rename to lock_fd
+has 'lock_fd' => (
 	is => 'ro',
 	builder => '_build_lock',
 );
@@ -295,11 +295,11 @@ sub _lock {
 	# }
 	return unless $self->lock_file();
 
-	if(my $lock = $self->lock()) {
-		# rint $tulip "locking\n";
+	if(my $lock = $self->lock_fd()) {
+		# print $tulip "locking\n";
 		flock($lock, ($params{type} eq 'read') ? Fcntl::LOCK_SH : Fcntl::LOCK_EX);
 	} else {
-		# rint $tulip 'lost lock ', $self->lock_file(), "\n";
+		# print $tulip 'lost lock ', $self->lock_file(), "\n";
 		croak('Lost lock: ', $self->lock_file());
 	}
 	# print $tulip "locked\n";
@@ -315,7 +315,7 @@ sub _unlock {
 	# while((my @call_details = (caller($i++)))) {
 		# print $tulip "\t", $call_details[1], ':', $call_details[2], ' in function ', $call_details[3], "\n";
 	# }
-	if(my $lock = $self->lock()) {
+	if(my $lock = $self->lock_fd()) {
 		flock($lock, Fcntl::LOCK_UN);
 	} else {
 		# print $tulip 'lost lock for unlock ', $self->lock_file(), "\n";
@@ -461,7 +461,7 @@ sub DEMOLISH {
 		$self->_unlock();
 		if($can_remove && (my $lock_file = $self->lock_file())) {
 			$self->lock_file(undef);
-			close $self->lock();
+			close $self->lock_fd();
 			unlink $lock_file;
 			# print $tulip "unlink $lock_file\n";
 			# close $tulip;
