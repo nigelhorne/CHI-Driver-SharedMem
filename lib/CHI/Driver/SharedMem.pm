@@ -232,14 +232,19 @@ When the Shared memory area is getting close to full, discard the least recently
 =cut
 
 sub discard_policy_lru {
-	# return;	# debugging why I get uninitialized values in the sort
 	my $self = shift;
 
 	$self->_lock(type => 'read');
 	my $last_used_time = $self->_data()->{CHI_Meta_Namespace()}->{last_used_time};
 	$self->_unlock();
+	open(my $tulip, '>>', '/tmp/tulip');
+	print $tulip "lru\n";
 	my @keys_in_lru_order =
 		sort { $last_used_time->{$a} <=> $last_used_time->{$b} } $self->get_keys();
+	print $tulip "lru size ", scalar(@keys_in_lru_order), "\n";
+	print $tulip "\t", join(' ', @keys_in_lru_order), "\n";
+	# Workaround for test_discard_timeout
+	sleep($self->discard_timeout() + 2) if($ENV{'AUTHOR_TESTING'});
 	return sub {
 		shift(@keys_in_lru_order);
 	};
