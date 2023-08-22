@@ -20,11 +20,11 @@ extends 'CHI::Driver';
 has 'shm_key' => (is => 'ro', isa => 'Int');
 has 'shm' => (is => 'ro', builder => '_build_shm', lazy => 1);
 has 'shm_size' => (is => 'rw', isa => 'Int', default => 8 * 1024);
-has 'lock' => (
+has 'lock_file' => (is => 'rw', isa => 'Str|Undef');
+has 'lock' => (	# TODO: rename to lock_fd
 	is => 'ro',
 	builder => '_build_lock',
 );
-has 'lock_file' => (is => 'rw', isa => 'Str|Undef');
 has '_data_size' => (
 	is => 'rw',
 	isa => 'Int',
@@ -106,12 +106,14 @@ The data are serialized into JSON.
 sub store {
 	my($self, $key, $value) = @_;
 
+	$self->_lock(type => 'write');
 	my $h = $self->_data();
 	$h->{$self->namespace()}->{$key} = $value;
 	# if($self->{'is_size_aware'}) {
 		# $h->{CHI_Meta_Namespace()}->{'last_used_time'}->{$key} = time;
 	# }
 	$self->_data($h);
+	$self->_unlock();
 }
 
 =head2 fetch
@@ -123,6 +125,11 @@ Retrieves an object from the cache
 sub fetch {
 	my($self, $key) = @_;
 
+	if($self->{is_size_aware}) {
+		$self->_lock(type => 'write');
+	} else {
+		$self->_lock(type => 'read');
+	}
 	# open(my $tulip, '>>', '/tmp/tulip');
 	# print $tulip __LINE__, "\n";
 	# print $tulip __LINE__, "\n";
@@ -133,6 +140,7 @@ sub fetch {
 		$h->{CHI_Meta_Namespace()}->{last_used_time}->{$key} = time;
 		$self->_data($h);
 	}
+	$self->_unlock();
 	# print $tulip __LINE__, "\n";
 	# close $tulip;
 	return $rc;
@@ -147,10 +155,12 @@ Remove an object from the cache
 sub remove {
 	my($self, $key) = @_;
 
+	$self->_lock(type => 'write');
 	my $h = $self->_data();
 	delete $h->{$self->namespace()}->{$key};
 	delete $h->{CHI_Meta_Namespace()}->{last_used_time}->{$key};
 	$self->_data($h);
+	$self->_unlock();
 
 	# open(my $tulip, '>>', '/tmp/tulip');
 	# print $tulip "remove: $key\n";
@@ -165,9 +175,11 @@ Removes all data from the current namespace
 sub clear {
 	my $self = shift;
 
+	$self->_lock(type => 'write');
 	my $h = $self->_data();
 	delete $h->{$self->namespace()};
 	$self->_data($h);
+	$self->_unlock();
 
 	# open(my $tulip, '>>', '/tmp/tulip');
 	# print $tulip "clear ", $self->namespace(), "\n";
@@ -182,7 +194,9 @@ Gets a list of the keys in the current namespace
 sub get_keys {
 	my $self = shift;
 
+	$self->_lock(type => 'read');
 	my $h = $self->_data();
+	$self->_unlock();
 	return(keys(%{$h->{$self->namespace()}}));
 }
 
@@ -195,7 +209,9 @@ Gets a list of the namespaces in the cache
 sub get_namespaces {
 	my $self = shift;
 
+	$self->_lock(type => 'read');
 	my $rc = $self->_data();
+	$self->_unlock();
 	# Needs to be sorted for RT89892
 	my @rc = sort keys(%{$rc});
 	return @rc;
@@ -219,7 +235,9 @@ sub discard_policy_lru {
 	# return;	# debugging why I get uninitialized values in the sort
 	my $self = shift;
 
+	$self->_lock(type => 'read');
 	my $last_used_time = $self->_data()->{CHI_Meta_Namespace()}->{last_used_time};
+	$self->_unlock();
 	my @keys_in_lru_order =
 		sort { $last_used_time->{$a} <=> $last_used_time->{$b} } $self->get_keys();
 	return sub {
@@ -315,14 +333,10 @@ sub _data_size {
 		return 0;
 	}
 	if(defined($value)) {
-		$self->_lock(type => 'write');
 		$self->shm()->write(pack('I', $value), 0, $Config{intsize});
-		$self->_unlock();
 		return $value;
 	}
-	$self->_lock(type => 'read');
 	my $size = $self->shm()->read(0, $Config{intsize});
-	$self->_unlock();
 	unless(defined($size)) {
 		return 0;
 	}
@@ -347,17 +361,13 @@ sub _data {
 			$self->_unlock();
 			croak("Encoding failed. ($cur_size bytes: $f) ");
 		}
-		$self->_lock(type => 'write');
 		$self->shm()->write($f, $Config{intsize}, $cur_size);
 		$self->_data_size($cur_size);
-		$self->_unlock();
 		# print $tulip "set: $cur_size bytes\n";
 		# close $tulip;
 		return $h;
 	}
-	$self->_lock(type => 'read');
 	my $cur_size = $self->_data_size();
-	$self->_unlock();
 	print $tulip "get: $cur_size bytes\n";
 	if($cur_size) {
 		my $rc;
@@ -367,7 +377,6 @@ sub _data {
 		if($@) {
 			$self->_lock(type => 'write');
 			$self->_data_size(0);
-			$self->_unlock();
 			my $foo = $self->shm()->read($Config{intsize}, $cur_size);
 			print $tulip "\tDecode fail $cur_size bytes $@\n\t$foo\n";
 			my $i = 0;
@@ -375,6 +384,7 @@ sub _data {
 				print $tulip "\t", $call_details[1], ':', $call_details[2], ' in function ', $call_details[3], "\n";
 			}
 			croak($@);
+			$self->_unlock();
 		}
 		return $rc;
 		# return JSON::MaybeXS->new()->ascii(1)->decode($self->shm()->read($Config{intsize}, $cur_size));
@@ -414,10 +424,9 @@ sub DEMOLISH {
 	# open(my $tulip, '>>', '/tmp/tulip');
 	# print $tulip "DEMOLISH\n";
 	if($self->shm_key() && $self->shm()) {
-		my $cur_size;
-		$cur_size = $self->_data_size();
-		# print $tulip "DEMOLISH: $cur_size bytes\n";
 		$self->_lock(type => 'write');
+		my $cur_size = $self->_data_size();
+		# print $tulip "DEMOLISH: $cur_size bytes\n";
 		my $can_remove = 0;
 		my $stat = $self->shm()->stat();
 		if($cur_size == 0) {
