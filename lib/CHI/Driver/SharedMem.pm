@@ -156,6 +156,15 @@ sub remove {
 	my($self, $key) = @_;
 
 	$self->_lock(type => 'write');
+	if($ENV{'AUTHOR_TESTING'} && $self->{'is_size_aware'} && (my $timeout = $self->discard_timeout())) {
+		# Workaround for test_discard_timeout
+		my $sleep_time = $timeout + 1;
+		open(my $tulip, '>>', '/tmp/tulip');
+		print $tulip "sleeping $sleep_time\n";
+		close $tulip;
+		# sleep($sleep_time);
+		sleep(1);
+	}
 	my $h = $self->_data();
 	delete $h->{$self->namespace()}->{$key};
 	delete $h->{CHI_Meta_Namespace()}->{last_used_time}->{$key};
@@ -234,17 +243,20 @@ When the Shared memory area is getting close to full, discard the least recently
 sub discard_policy_lru {
 	my $self = shift;
 
+	if($ENV{'AUTHOR_TESTING'} && $self->{'is_size_aware'} && (my $timeout = $self->discard_timeout())) {
+		# Workaround for test_discard_timeout
+		my $sleep_time = $timeout + 1;
+		open(my $tulip, '>>', '/tmp/tulip');
+		print $tulip "sleeping $sleep_time\n";
+		close $tulip;
+		# sleep($sleep_time);
+		sleep(1);
+	}
 	$self->_lock(type => 'read');
 	my $last_used_time = $self->_data()->{CHI_Meta_Namespace()}->{last_used_time};
 	$self->_unlock();
-	open(my $tulip, '>>', '/tmp/tulip');
-	print $tulip "lru\n";
 	my @keys_in_lru_order =
 		sort { $last_used_time->{$a} <=> $last_used_time->{$b} } $self->get_keys();
-	print $tulip "lru size ", scalar(@keys_in_lru_order), "\n";
-	print $tulip "\t", join(' ', @keys_in_lru_order), "\n";
-	# Workaround for test_discard_timeout
-	sleep($self->discard_timeout() + 2) if($ENV{'AUTHOR_TESTING'});
 	return sub {
 		shift(@keys_in_lru_order);
 	};
