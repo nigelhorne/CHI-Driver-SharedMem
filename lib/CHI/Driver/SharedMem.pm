@@ -158,10 +158,10 @@ sub remove {
 	$self->_lock(type => 'write');
 	if($ENV{'AUTHOR_TESTING'} && $self->{'is_size_aware'} && (my $timeout = $self->discard_timeout())) {
 		# Workaround for test_discard_timeout
-		my $sleep_time = $timeout + 1;
-		open(my $tulip, '>>', '/tmp/tulip');
-		print $tulip "sleeping $sleep_time\n";
-		close $tulip;
+		# my $sleep_time = $timeout + 1;
+		# open(my $tulip, '>>', '/tmp/tulip');
+		# print $tulip "sleeping $sleep_time\n";
+		# close $tulip;
 		# sleep($sleep_time);
 		sleep(1);
 	}
@@ -245,10 +245,10 @@ sub discard_policy_lru {
 
 	if($ENV{'AUTHOR_TESTING'} && $self->{'is_size_aware'} && (my $timeout = $self->discard_timeout())) {
 		# Workaround for test_discard_timeout
-		my $sleep_time = $timeout + 1;
-		open(my $tulip, '>>', '/tmp/tulip');
-		print $tulip "sleeping $sleep_time\n";
-		close $tulip;
+		# my $sleep_time = $timeout + 1;
+		# open(my $tulip, '>>', '/tmp/tulip');
+		# print $tulip "sleeping $sleep_time\n";
+		# close $tulip;
 		# sleep($sleep_time);
 		sleep(1);
 	}
@@ -294,10 +294,10 @@ sub _build_lock {
 	# open(my $fd, '<', $0) || croak("$0: $!");
 	# FIXME: make it unique for each object, not a singleton
 	$self->lock_file('/tmp/' . __PACKAGE__);
-	open(my $tulip, '>>', '/tmp/tulip');
-	print $tulip "build_lock\n", $self->lock_file(), "\n";
+	# open(my $tulip, '>>', '/tmp/tulip');
+	# print $tulip "build_lock\n", $self->lock_file(), "\n";
 	open(my $fd, '>', $self->lock_file()) || croak($self->lock_file(), ": $!");
-	close $tulip;
+	# close $tulip;
 	return $fd;
 }
 
@@ -364,12 +364,12 @@ sub _data_size {
 sub _data {
 	my($self, $h) = @_;
 
-	open(my $tulip, '>>', '/tmp/tulip');
+	# open(my $tulip, '>>', '/tmp/tulip');
 	# print $tulip __LINE__, "\n";
 	if(defined($h)) {
 		my $f = JSON::MaybeXS->new()->ascii(1)->encode($h);
 		my $cur_size = length($f);
-		print $tulip __LINE__, " cmp $cur_size > ", $self->shm_size(), "\n";
+		# print $tulip __LINE__, " cmp $cur_size > ", $self->shm_size(), "\n";
 		if($cur_size > ($self->shm_size() - $Config{intsize})) {
 			$self->_unlock();
 			croak("Sharedmem set failed - value too large? ($cur_size bytes) > ", $self->shm_size());
@@ -385,7 +385,7 @@ sub _data {
 		return $h;
 	}
 	my $cur_size = $self->_data_size();
-	print $tulip "get: $cur_size bytes\n";
+	# print $tulip "get: $cur_size bytes\n";
 	if($cur_size) {
 		my $rc;
 		eval {
@@ -395,18 +395,18 @@ sub _data {
 			$self->_lock(type => 'write');
 			$self->_data_size(0);
 			my $foo = $self->shm()->read($Config{intsize}, $cur_size);
-			print $tulip "\tDecode fail $cur_size bytes $@\n\t$foo\n";
-			my $i = 0;
-			while((my @call_details = (caller($i++)))) {
-				print $tulip "\t", $call_details[1], ':', $call_details[2], ' in function ', $call_details[3], "\n";
-			}
+			# print $tulip "\tDecode fail $cur_size bytes $@\n\t$foo\n";
+			# my $i = 0;
+			# while((my @call_details = (caller($i++)))) {
+				# print $tulip "\t", $call_details[1], ':', $call_details[2], ' in function ', $call_details[3], "\n";
+			# }
 			croak($@);
 			$self->_unlock();
 		}
 		return $rc;
 		# return JSON::MaybeXS->new()->ascii(1)->decode($self->shm()->read($Config{intsize}, $cur_size));
 	}
-	close $tulip;
+	# close $tulip;
 	return {};
 }
 
