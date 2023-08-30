@@ -4,7 +4,7 @@ CHI::Driver::SharedMem - Cache data in shared memory
 
 # VERSION
 
-Version 0.18
+Version 0.19
 
 # SYNOPSIS
 
