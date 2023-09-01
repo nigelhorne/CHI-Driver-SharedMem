@@ -6,6 +6,10 @@ if($^O eq 'MSWin32') {
 	# This will set the CPAN-Testers status to Unknown
 	# TODO: Work out how to set the status to NA
 	die 'Windows is not supported';
+} elsif($^O eq 'cygwin') {
+	# This will set the CPAN-Testers status to Unknown
+	# TODO: Work out how to set the status to NA
+	die 'cygwin';
 } elsif($^O eq 'gnu') {
 	# I don't believe that the hurd supports shared memory
 	die 'GNU/Hurd is not supported';
