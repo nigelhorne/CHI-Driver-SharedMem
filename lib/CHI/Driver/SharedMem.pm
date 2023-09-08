@@ -422,7 +422,7 @@ sub BUILD {
 	unless($self->shm_key()) {
 		croak 'CHI::Driver::SharedMem - no shm_key given';
 	}
-	$| = 1;
+	# $| = 1;
 }
 
 =head2 DEMOLISH
