@@ -132,7 +132,6 @@ sub fetch {
 	}
 	# open(my $tulip, '>>', '/tmp/tulip');
 	# print $tulip __LINE__, "\n";
-	# print $tulip __LINE__, "\n";
 	my $rc = $self->_data()->{$self->namespace()}->{$key};
 	# print $tulip __LINE__, "\n";
 	if($self->{is_size_aware}) {
