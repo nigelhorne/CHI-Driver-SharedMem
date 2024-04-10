@@ -109,9 +109,9 @@ sub store {
 	$self->_lock(type => 'write');
 	my $h = $self->_data();
 	$h->{$self->namespace()}->{$key} = $value;
-	# if($self->{'is_size_aware'}) {
-		# $h->{CHI_Meta_Namespace()}->{'last_used_time'}->{$key} = time;
-	# }
+	if($self->{'is_size_aware'}) {
+		$h->{CHI_Meta_Namespace()}->{'last_used_time'}->{$key} = time;
+	}
 	$self->_data($h);
 	$self->_unlock();
 }

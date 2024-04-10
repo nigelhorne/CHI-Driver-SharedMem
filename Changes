@@ -1,5 +1,8 @@
 Revision history for CHI::Driver::SharedMem
 
+0.20
+	Try re-enabling the is_size_aware code in store()
+
 0.19	Wed Aug 30 08:38:49 EDT 2023
 	Panic if the shm segment is lost
 	Refactor the locking
