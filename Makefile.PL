@@ -45,7 +45,8 @@ WriteMakefile(
 	'Fcntl' => 0,
     }, TEST_REQUIRES => {
 	'Test::Carp' => 0,
-	},
+	'Test::Needs' => 0
+    },
     dist                => { COMPRESS => 'gzip -9f', SUFFIX => 'gz', },
     clean               => { FILES => 'CHI-Driver-SharedMem-*' },
     META_MERGE		=> {

@@ -393,7 +393,7 @@ sub _data {
 		if($@) {
 			$self->_lock(type => 'write');
 			$self->_data_size(0);
-			my $foo = $self->shm()->read($Config{intsize}, $cur_size);
+			# my $foo = $self->shm()->read($Config{intsize}, $cur_size);
 			# print $tulip "\tDecode fail $cur_size bytes $@\n\t$foo\n";
 			# my $i = 0;
 			# while((my @call_details = (caller($i++)))) {
