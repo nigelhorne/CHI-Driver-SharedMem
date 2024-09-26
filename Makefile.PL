@@ -13,6 +13,10 @@ if($^O eq 'MSWin32') {
 } elsif($^O eq 'gnu') {
 	# I don't believe that the hurd supports shared memory
 	die 'GNU/Hurd is not supported';
+} elsif($^O eq 'haiku') {
+	# shmget is not supported
+	# http://www.cpantesters.org/cpan/report/176c26f2-7b88-11ef-b376-d0d4ac829ca5
+	die 'Haiku is not supported';
 }
 
 WriteMakefile(
