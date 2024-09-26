@@ -45,6 +45,7 @@ WriteMakefile(
 	'Fcntl' => 0,
     }, TEST_REQUIRES => {
 	'Test::Carp' => 0,
+	'Test::DescribeMe' => 0,
 	'Test::Needs' => 0
     },
     dist                => { COMPRESS => 'gzip -9f', SUFFIX => 'gz', },
