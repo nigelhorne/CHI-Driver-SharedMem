@@ -3,6 +3,8 @@ Revision history for CHI::Driver::SharedMem
 0.20
 	Try re-enabling the is_size_aware code in store()
 	No support for Haiku (http://www.cpantesters.org/cpan/report/176c26f2-7b88-11ef-b376-d0d4ac829ca5)
+	Check shm_size is properly initialized
+	Use gtar to create a distribution on Macs
 
 0.19	Wed Aug 30 08:38:49 EDT 2023
 	Panic if the shm segment is lost

@@ -67,7 +67,7 @@ sub test_shmkey_required : Tests {
 		$cache = CHI->new(driver => 'SharedMem');
 	};
 	if($@) {
-		ok($@ =~ /CHI::Driver::SharedMem - no shm_key given/);
+		ok($@ =~ /CHI::Driver::SharedMem: no shm_key given/);
 		ok(!defined($cache));
 	} else {
 		ok(0, 'Allowed shm_key to be undefined');

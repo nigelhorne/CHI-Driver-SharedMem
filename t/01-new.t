@@ -51,7 +51,7 @@ NEW: {
 				$cache = CHI->new(driver => 'SharedMem');
 			};
 			if($@) {
-				ok($@ =~ /CHI::Driver::SharedMem - no shm_key given/);
+				ok($@ =~ /CHI::Driver::SharedMem: no shm_key given/);
 			} else {
 				ok(0, 'Allowed shmkey to be undefined');
 			}

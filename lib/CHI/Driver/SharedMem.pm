@@ -17,9 +17,11 @@ use Fcntl;
 
 extends 'CHI::Driver';
 
+use constant DEFAULT_SHM_SIZE => 8 * 1024;
+
 has 'shm_key' => (is => 'ro', isa => 'Int');
 has 'shm' => (is => 'ro', builder => '_build_shm', lazy => 1);
-has 'shm_size' => (is => 'rw', isa => 'Int', default => 8 * 1024);
+has 'shm_size' => (is => 'rw', isa => 'Int', default => DEFAULT_SHM_SIZE);
 has 'lock_file' => (is => 'rw', isa => 'Str|Undef');
 has 'lock_fd' => (
 	is => 'ro',
@@ -269,7 +271,7 @@ sub _build_shm {
 	my $shm_size = $self->shm_size();
 
 	if((!defined($shm_size)) || ($shm_size == 0)) {
-		# Probably some strange condition in cleanup
+		# Probably some strange condition in the cleanup
 		# croak 'Size == 0';
 		return;
 	}
@@ -419,14 +421,18 @@ sub BUILD {
 	my $self = shift;
 
 	unless($self->shm_key()) {
-		croak 'CHI::Driver::SharedMem - no shm_key given';
+		croak(__PACKAGE__, ': no shm_key given');
+	}
+	# Check shm_size is properly initialized
+	unless($self->shm_size() > 0) {
+		croak(__PACKAGE__, ': invalid shm_size');
 	}
 	# $| = 1;
 }
 
 =head2 DEMOLISH
 
-If there is no data in the shared memory area, and no-one else is using it,
+If there is no data in the shared memory area, and no one else is using it,
 it's safe to remove it and reclaim the memory.
 
 =cut
@@ -492,8 +498,9 @@ Nigel Horne, C<< <njh at bandsman.co.uk> >>
 =head1 BUGS
 
 Please report any bugs or feature requests to C<bug-chi-driver-sharedmem at rt.cpan.org>, or through
-the web interface at L<http://rt.cpan.org/NoAuth/ReportBug.html?Queue=CHI-Driver-SharedMem>.  I will be notified, and then you'll
-automatically be notified of progress on your bug as I make changes.
+the web interface at L<http://rt.cpan.org/NoAuth/ReportBug.html?Queue=CHI-Driver-SharedMem>.
+I will be notified, and then you'll
+automatically be notified of the progress of your bug as I make changes.
 
 Max_size is handled, but if you're not consistent across the calls to each cache,
 the results are unpredictable because it's used to create the size of the shared memory
@@ -537,7 +544,7 @@ L<http://deps.cpantesters.org/?module=CHI::Driver::SharedMemory>
 
 =head1 LICENSE AND COPYRIGHT
 
-Copyright 2010-2023 Nigel Horne.
+Copyright 2010-2025 Nigel Horne.
 
 This program is released under the following licence: GPL2
 

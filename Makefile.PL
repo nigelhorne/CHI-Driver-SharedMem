@@ -19,6 +19,15 @@ if($^O eq 'MSWin32') {
 	die 'Haiku is not supported';
 }
 
+my $dist = {
+	COMPRESS => 'gzip -9f',	# Compress tarball using gzip
+	SUFFIX => 'gz',	# File suffix for tarball
+};
+
+if($^O eq 'darwin') {
+	$dist->{'TAR'} = 'gtar';
+}
+
 WriteMakefile(
     NAME                => 'CHI::Driver::SharedMem',
     AUTHOR              => q{Nigel Horne <njh@bandsman.co.uk>},
@@ -51,8 +60,7 @@ WriteMakefile(
 	'Test::Carp' => 0,
 	'Test::DescribeMe' => 0,
 	'Test::Needs' => 0
-    },
-    dist                => { COMPRESS => 'gzip -9f', SUFFIX => 'gz', },
+    }, dist => $dist,
     clean               => { FILES => 'CHI-Driver-SharedMem-*' },
     META_MERGE		=> {
     	'meta-spec' => { version => 2 },
