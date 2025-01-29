@@ -260,9 +260,9 @@ sub discard_policy_lru {
 	my @keys_in_lru_order = sort { 
 		my $rc;
 		if(!defined($last_used_time->{$a})) {
-			$rc = -1
-		} elsif(!defined($last_used_time->{$b})) {
 			$rc = 1
+		} elsif(!defined($last_used_time->{$b})) {
+			$rc = -1
 		} else {
 			$rc = $last_used_time->{$a} <=> $last_used_time->{$b}
 		}
