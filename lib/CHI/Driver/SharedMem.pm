@@ -254,10 +254,20 @@ sub discard_policy_lru {
 		sleep(1);
 	}
 	$self->_lock(type => 'read');
-	my $last_used_time = $self->_data()->{CHI_Meta_Namespace()}->{last_used_time};
+	my $last_used_time = $self->_data()->{CHI_Meta_Namespace()}->{'last_used_time'};
 	$self->_unlock();
-	my @keys_in_lru_order =
-		sort { $last_used_time->{$a} <=> $last_used_time->{$b} } $self->get_keys();
+	return if(!defined($last_used_time));
+	my @keys_in_lru_order = sort { 
+		my $rc;
+		if(!defined($last_used_time->{$a})) {
+			$rc = -1
+		} elsif(!defined($last_used_time->{$b})) {
+			$rc = 1
+		} else {
+			$rc = $last_used_time->{$a} <=> $last_used_time->{$b}
+		}
+		$rc
+	} $self->get_keys();
 	return sub {
 		shift(@keys_in_lru_order);
 	};
