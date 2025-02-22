@@ -411,8 +411,8 @@ sub _data {
 			# while((my @call_details = (caller($i++)))) {
 				# print $tulip "\t", $call_details[1], ':', $call_details[2], ' in function ', $call_details[3], "\n";
 			# }
-			croak($@);
 			$self->_unlock();
+			croak($@);
 		}
 		return $rc;
 		# return JSON::MaybeXS->new()->ascii(1)->decode($self->shm()->read($Config{intsize}, $cur_size));
