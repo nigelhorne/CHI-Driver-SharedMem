@@ -134,10 +134,10 @@ sub fetch {
 	}
 	# open(my $tulip, '>>', '/tmp/tulip');
 	# print $tulip __LINE__, "\n";
-	my $rc = $self->_data()->{$self->namespace()}->{$key};
+	my $h = $self->_data();
+	my $rc = $h->{$self->namespace()}->{$key};
 	# print $tulip __LINE__, "\n";
 	if($self->{is_size_aware}) {
-		my $h = $self->_data();
 		$h->{CHI_Meta_Namespace()}->{last_used_time}->{$key} = time;
 		$self->_data($h);
 	}
