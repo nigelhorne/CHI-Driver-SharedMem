@@ -32,7 +32,13 @@ if(defined($shm = IPC::SharedMem->new($shm_key, $shm_size, S_IRUSR|S_IWUSR))) {
 	$s->set('xyzzy', 'x' x 10, '5 mins');
 	ok($s->get('xyzzy') eq 'x' x 10);
 
-	$s->set('xyzzy', 'x' x 1000, '5 mins');
+	eval {
+		$s->set('xyzzy', 'x' x 1000, '5 mins');
+	};
+	if($@) {
+		diag($@);
+		$error_called++;
+	}
 	cmp_ok($error_called, '==', 1, 'exactly one error');
 	ok(!defined($s->get('xyzzy')));
 }
