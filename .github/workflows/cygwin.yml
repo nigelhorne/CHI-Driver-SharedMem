@@ -6,9 +6,9 @@ name: Test Code on Cygwin
 on:
   push:
     branches:
-      - '*'
+      - "*"
     tags-ignore:
-      - '*'
+      - "*"
   pull_request:
 permissions:
   contents: read

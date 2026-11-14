@@ -5,9 +5,9 @@ name: Test Code on Alpine Linux
 on:
   push:
     branches:
-      - '*'
+      - "*"
     tags-ignore:
-      - '*'
+      - "*"
   pull_request:
 permissions:
   contents: read

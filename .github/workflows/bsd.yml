@@ -7,9 +7,9 @@ permissions:
 on:
   push:
     branches:
-      - '*'
+      - "*"
     tags-ignore:
-      - '*'
+      - "*"
   pull_request:
 jobs:
   build:
@@ -19,10 +19,10 @@ jobs:
       matrix:
         os:
           - name: freebsd
-            version: '13.0'
+            version: "13.0"
             pkginstall: pkg install -y p5-ExtUtils-MakeMaker
           - name: openbsd
-            version: '7.1'
+            version: "7.1"
             pkginstall: pkg_add p5-List-MoreUtils
 
     steps:
